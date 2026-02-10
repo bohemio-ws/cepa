@@ -50,97 +50,6 @@
       0% { transform: rotate(0deg); } 
       100% { transform: rotate(360deg); } 
     }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fadeIn {
-      animation: fadeIn 0.3s ease-out;
-    }
-    
-    @media (max-width: 640px) {
-      .room-label {
-        padding: 18px 14px !important;
-        min-height: 64px;
-      }
-      
-      #toggleObservaciones {
-        padding: 20px 16px !important;
-        margin: 8px 0;
-      }
-      
-      textarea, select, input[type="text"] {
-        font-size: 16px !important;
-      }
-      
-      .fixed.bottom-0 {
-        padding-bottom: max(1rem, env(safe-area-inset-bottom));
-        padding-left: env(safe-area-inset-left);
-        padding-right: env(safe-area-inset-right);
-      }
-      
-      #rooms-container {
-        gap: 12px;
-      }
-      
-      .glass-card {
-        border-radius: 20px;
-      }
-      
-      .room-label span.text-2xl {
-        font-size: 28px;
-        min-width: 40px;
-      }
-      
-      #contenedorObservaciones textarea {
-        min-height: 120px;
-      }
-      
-      .bg-gradient-to-r.from-blue-600.to-indigo-700 {
-        padding: 20px 16px !important;
-        border-radius: 0 0 28px 28px !important;
-      }
-      
-      #submitBtn {
-        padding-top: 18px !important;
-        padding-bottom: 18px !important;
-      }
-    }
-
-    @media (hover: none) and (pointer: coarse) {
-      html {
-        scroll-behavior: smooth;
-      }
-      
-      button:active, .room-label:active {
-        transform: scale(0.98) !important;
-        transition: transform 0.1s !important;
-      }
-    }
-
-    @media (max-width: 480px) {
-      #successModal > div {
-        width: 90vw !important;
-        margin: 20px !important;
-        padding: 24px 20px !important;
-      }
-      
-      #successModal .text-6xl {
-        font-size: 4rem !important;
-      }
-    }
-
-    .room-label span.font-bold {
-      word-break: break-word;
-      overflow-wrap: break-word;
-    }
-
-    #loader {
-      width: 28px;
-      height: 28px;
-      border-width: 3px;
-    }
   </style>
 </head>
 <body class="pb-32">
@@ -171,9 +80,9 @@
       </select>
     </div>
 
-    <!-- LISTA DE ESTANCIAS -->
+    <!-- LISTA DE ESTANCIAS - IMPORTANTE: ESTO SE GENERA CON JS -->
     <div id="rooms-container" class="grid grid-cols-1 gap-4">
-      <!-- Las aulas se generarán AQUÍ con JavaScript -->
+      <!-- LAS 20 ESTANCIAS APARECERÁN AQUÍ -->
     </div>
 
     <!-- BOTÓN DE OBSERVACIONES DEL CENTRO -->
@@ -181,9 +90,8 @@
       <button 
         type="button"
         id="toggleObservaciones"
-        class="w-full glass-card p-5 rounded-2xl shadow-md border-l-8 border-cyan-500 hover:shadow-lg transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-cyan-400"
-        aria-expanded="false"
-        aria-controls="contenedorObservaciones">
+        class="w-full glass-card p-5 rounded-2xl shadow-md border-l-8 border-cyan-500 hover:shadow-lg transition-all duration-300 group"
+        onclick="toggleObservaciones()">
         
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
@@ -196,19 +104,15 @@
             </div>
           </div>
           
-          <span id="iconoObservaciones" 
-            class="text-gray-500 text-2xl transform transition-transform duration-300 group-hover:scale-110">
-            ▼
-          </span>
+          <span id="iconoObservaciones" class="text-gray-500 text-2xl">▼</span>
         </div>
       </button>
 
       <!-- ÁREA DE TEXTO OCULTA -->
-      <div id="contenedorObservaciones" 
-        class="hidden mt-4 glass-card p-5 rounded-2xl shadow-sm border-t border-gray-100 animate-fadeIn">
+      <div id="contenedorObservaciones" class="hidden mt-4 glass-card p-5 rounded-2xl shadow-sm">
         
         <div class="mb-4">
-          <label for="campoObservaciones" class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">
+          <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">
             📋 Detalles importantes
           </label>
           <p class="text-xs text-gray-500 mb-3">Estas observaciones se compartirán con el equipo directivo.</p>
@@ -221,12 +125,13 @@
           maxlength="500"
           placeholder="Ejemplo: • Cristales de la entrada necesitan limpieza exterior.
 • Aula de informática: ratón inalámbrico sin batería.
-• Material de limpieza bajo en el almacén (reponer fregonas)..."
-          class="w-full p-4 rounded-xl bg-gray-50/70 border-none focus:ring-2 focus:ring-cyan-500 focus:bg-white obs-input font-medium text-gray-700 placeholder-gray-400 transition-all resize-y"></textarea>
+• Material de limpieza bajo en el almacén..."
+          class="w-full p-4 rounded-xl bg-gray-50/70 border-none focus:ring-2 focus:ring-cyan-500 focus:bg-white obs-input font-medium text-gray-700 placeholder-gray-400"
+          oninput="actualizarContadorObservaciones(this)"></textarea>
         
         <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
           <p class="text-xs text-gray-400 flex items-center">
-            <span class="mr-1">💡</span> Puedes usar puntos para listar incidencias
+            <span class="mr-1">💡</span> Usa puntos para listar
           </p>
           <span id="contadorObservaciones" class="text-xs font-semibold text-gray-500">0/500</span>
         </div>
@@ -238,10 +143,10 @@
       <label class="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">📸 Fotos de hoy</label>
       <input type="file" id="photoInput" accept="image/*" capture="environment" multiple 
              class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
-      <div id="photoCount" class="text-xs text-gray-500 mt-2"></div>
+      <div id="photoCount" class="text-xs text-gray-500 mt-2">No hay fotos seleccionadas</div>
     </div>
 
-    <!-- BOTÓN ENVIAR (FIXED) -->
+    <!-- BOTÓN ENVIAR -->
     <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-gray-100 flex justify-center">
       <button type="submit" id="submitBtn" class="w-full max-w-md bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center space-x-3">
         <span>ENVIAR REPORTE DIARIO</span>
@@ -252,18 +157,16 @@
 
   <!-- MODAL DE ÉXITO -->
   <div id="successModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-6 z-50">
-    <div class="bg-white rounded-3xl p-8 text-center shadow-2xl transition-transform">
+    <div class="bg-white rounded-3xl p-8 text-center shadow-2xl">
       <div class="text-6xl mb-4">🎉</div>
       <h2 class="text-2xl font-bold text-gray-800 mb-2">¡Reporte Enviado!</h2>
-      <p class="text-gray-600 mb-6">Los datos y fotos se han registrado en la hoja de cálculo.</p>
+      <p class="text-gray-600 mb-6">Los datos se han registrado en la hoja de cálculo.</p>
       <button onclick="location.reload()" class="bg-green-500 text-white px-8 py-3 rounded-full font-bold shadow-lg">Continuar</button>
     </div>
   </div>
 
   <script>
-    // ==================== CONFIGURACIÓN ====================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzIiyEydpBKDFJv46y7PbuQ2F9K0NbCeJLcok6iCRwsoxd7gHxs8lunch8Rui58l3c/exec";
-
+    // ============ LISTA COMPLETA DE ESTANCIAS ============
     const estancias = [
       { id: "HALL", label: "Hall Entrada", icon: "🏛️" },
       { id: "DESPACHOS", label: "Despachos", icon: "💼" },
@@ -287,41 +190,19 @@
       { id: "CRISTALES_AULAS", label: "Cristales Aulas", icon: "🧼" }
     ];
 
-    // ==================== INICIALIZACIÓN PRINCIPAL ====================
-    // Este es el PUNTO DE ENTRADA - se ejecuta cuando la página está lista
-    function inicializarApp() {
-      console.log("🔄 Inicializando aplicación CEPA...");
-      
-      // 1. GENERAR TODAS LAS AULAS/ESTANCIAS
-      generarTodasLasEstancias();
-      
-      // 2. CONFIGURAR BOTÓN DE OBSERVACIONES
-      configurarObservacionesCentro();
-      
-      // 3. CONFIGURAR FOTOS
-      configurarInputFotos();
-      
-      // 4. CONFIGURAR ENVÍO DEL FORMULARIO
-      configurarEnvioFormulario();
-      
-      // 5. CARGAR DATOS GUARDADOS (si los hay)
-      cargarDatosGuardados();
-      
-      // 6. CONFIGURAR ATAJOS DE TECLADO
-      configurarAtajosTeclado();
-      
-      console.log("✅ Aplicación inicializada correctamente");
-    }
-
-    // ==================== 1. GENERAR ESTANCIAS ====================
-    function generarTodasLasEstancias() {
+    // ============ 1. GENERAR LAS ESTANCIAS (ESTO ES LO MÁS IMPORTANTE) ============
+    function generarEstancias() {
       const container = document.getElementById('rooms-container');
+      
       if (!container) {
-        console.error("❌ No se encontró el contenedor de estancias");
+        console.error("ERROR: No se encuentra el contenedor 'rooms-container'");
         return;
       }
       
-      container.innerHTML = ''; // Limpiar por si acaso
+      console.log("Generando " + estancias.length + " estancias...");
+      
+      // LIMPIAR Y GENERAR NUEVAS
+      container.innerHTML = '';
       
       estancias.forEach(room => {
         const card = document.createElement('div');
@@ -340,53 +221,30 @@
         container.appendChild(card);
       });
       
-      console.log(`✅ Generadas ${estancias.length} estancias`);
+      console.log("✅ " + estancias.length + " estancias generadas correctamente");
     }
 
-    // ==================== 2. OBSERVACIONES DEL CENTRO ====================
-    function configurarObservacionesCentro() {
-      const toggleBtn = document.getElementById('toggleObservaciones');
+    // ============ 2. OBSERVACIONES DEL CENTRO ============
+    function toggleObservaciones() {
       const contenedor = document.getElementById('contenedorObservaciones');
       const icono = document.getElementById('iconoObservaciones');
-      const textarea = document.getElementById('campoObservaciones');
       
-      if (!toggleBtn || !contenedor || !icono || !textarea) {
-        console.warn("⚠️ Elementos de observaciones no encontrados");
-        return;
+      if (contenedor.classList.contains('hidden')) {
+        contenedor.classList.remove('hidden');
+        icono.textContent = '▲';
+        icono.style.transform = 'rotate(180deg)';
+        document.getElementById('campoObservaciones').focus();
+      } else {
+        contenedor.classList.add('hidden');
+        icono.textContent = '▼';
+        icono.style.transform = 'rotate(0deg)';
       }
-      
-      // Configurar clic en el botón
-      toggleBtn.addEventListener('click', function() {
-        const estaVisible = contenedor.classList.toggle('hidden');
-        
-        if (estaVisible) {
-          // Si se oculta
-          icono.style.transform = 'rotate(0deg)';
-          icono.textContent = '▼';
-        } else {
-          // Si se muestra
-          icono.style.transform = 'rotate(180deg)';
-          icono.textContent = '▲';
-          setTimeout(() => textarea.focus(), 50);
-        }
-        
-        toggleBtn.setAttribute('aria-expanded', !estaVisible);
-      });
-      
-      // Configurar contador de caracteres
-      textarea.addEventListener('input', function() {
-        actualizarContadorObservaciones(this);
-      });
-      
-      console.log("✅ Observaciones del centro configuradas");
     }
 
     function actualizarContadorObservaciones(textarea) {
       const contador = document.getElementById('contadorObservaciones');
-      if (!contador) return;
-      
       const longitud = textarea.value.length;
-      contador.textContent = `${longitud}/500`;
+      contador.textContent = longitud + '/500';
       
       if (longitud > 450) {
         contador.className = 'text-xs font-bold text-red-500';
@@ -397,111 +255,73 @@
       }
     }
 
-    // ==================== 3. CONFIGURAR FOTOS ====================
-    function configurarInputFotos() {
-      const photoInput = document.getElementById('photoInput');
-      if (!photoInput) {
-        console.warn("⚠️ Input de fotos no encontrado");
-        return;
-      }
-      
-      photoInput.addEventListener('change', function() {
-        const count = this.files.length;
-        const photoCount = document.getElementById('photoCount');
-        if (photoCount) {
-          photoCount.textContent = count === 0 ? 'No hay fotos seleccionadas' : 
-                                   count === 1 ? '1 foto seleccionada' : 
-                                   `${count} fotos seleccionadas`;
-        }
-      });
-      
-      console.log("✅ Input de fotos configurado");
-    }
+    // ============ 3. CONFIGURAR FOTOS ============
+    document.getElementById('photoInput').addEventListener('change', function() {
+      const count = this.files.length;
+      const texto = count === 0 ? 'No hay fotos seleccionadas' : 
+                    count === 1 ? '1 foto seleccionada' : 
+                    count + ' fotos seleccionadas';
+      document.getElementById('photoCount').textContent = texto;
+    });
 
-    // ==================== 4. CONFIGURAR ENVÍO ====================
-    function configurarEnvioFormulario() {
-      const form = document.getElementById('cleaningForm');
-      if (!form) {
-        console.error("❌ Formulario no encontrado");
-        return;
-      }
-      
-      form.addEventListener('submit', manejarEnvioFormulario);
-      console.log("✅ Envío del formulario configurado");
-    }
+    // ============ 4. CONFIGURAR ENVÍO ============
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzIiyEydpBKDFJv46y7PbuQ2F9K0NbCeJLcok6iCRwsoxd7gHxs8lunch8Rui58l3c/exec";
 
-    async function manejarEnvioFormulario(e) {
+    document.getElementById('cleaningForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
       const btn = document.getElementById('submitBtn');
       const loader = document.getElementById('loader');
-      const photoInput = document.getElementById('photoInput');
       
-      if (!btn || !loader) return;
-      
-      // Mostrar estado de carga
       btn.disabled = true;
       btn.style.opacity = "0.7";
       loader.style.display = "block";
 
-      // Recoger datos del formulario
-      const formData = new FormData(document.getElementById('cleaningForm'));
+      // Recoger datos
+      const formData = new FormData(this);
       const data = {};
       
       formData.forEach((value, key) => {
-        if (key.includes('_Check')) {
-          data[key] = true;
-        } else {
-          data[key] = value;
-        }
+        data[key] = key.includes('_Check') ? true : value;
       });
 
-      // Asegurar que todas las estancias tengan valores
+      // Asegurar todas las estancias
       estancias.forEach(room => {
         if (!data[room.id + '_Check']) data[room.id + '_Check'] = false;
         if (!data[room.id + '_Obs']) data[room.id + '_Obs'] = "";
       });
 
       // Procesar fotos
+      const photoInput = document.getElementById('photoInput');
       const files = photoInput.files;
       let base64Photos = [];
+      
       if (files.length > 0) {
         for (let i = 0; i < files.length; i++) {
-          try {
-            const b64 = await toBase64(files[i]);
-            base64Photos.push(b64);
-          } catch (error) {
-            console.error('Error procesando foto:', error);
-          }
+          const b64 = await toBase64(files[i]);
+          base64Photos.push(b64);
         }
       }
       data['URL_Fotos'] = base64Photos.join('|');
 
-      // Enviar a Google Sheets
+      // Enviar
       try {
         await fetch(SCRIPT_URL, {
           method: 'POST',
           mode: 'no-cors',
-          cache: 'no-cache',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
 
-        // Mostrar éxito
-        mostrarConfirmacionExito();
-        
+        document.getElementById('successModal').style.display = 'flex';
       } catch (error) {
-        console.error('Error al enviar:', error);
-        alert("Error al enviar el reporte. Por favor, inténtalo de nuevo.");
-        
-        // Restaurar botón
+        alert("Error: " + error);
         btn.disabled = false;
         btn.style.opacity = "1";
         loader.style.display = "none";
       }
-    }
+    });
 
-    // Función para convertir archivos a Base64
     function toBase64(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -511,53 +331,18 @@
       });
     }
 
-    function mostrarConfirmacionExito() {
-      const modal = document.getElementById('successModal');
-      if (modal) {
-        modal.style.display = 'flex';
-      }
-      
-      // También feedback en el botón
-      const btn = document.getElementById('submitBtn');
-      if (btn) {
-        const originalHTML = btn.innerHTML;
-        btn.innerHTML = '<span>✅ ¡ENVIADO!</span>';
-        btn.style.background = 'linear-gradient(to right, #10b981, #059669)';
-        
-        // Recargar después de 3 segundos
-        setTimeout(() => {
-          location.reload();
-        }, 3000);
-      }
-    }
+    // ============ 5. INICIAR TODO CUANDO LA PÁGINA CARGUE ============
+    // ESTA ES LA PARTE MÁS IMPORTANTE - Se ejecuta automáticamente
+    window.onload = function() {
+      console.log("Página cargada, generando estancias...");
+      generarEstancias();
+      console.log("Aplicación lista. Deberías ver " + estancias.length + " estancias.");
+    };
 
-    // ==================== 5. CARGAR DATOS GUARDADOS ====================
-    function cargarDatosGuardados() {
-      try {
-        const guardado = localStorage.getItem('cepa_estado_guardado');
-        if (!guardado) return;
-        
-        const { datos } = JSON.parse(guardado);
-        
-        // Estado general
-        if (datos.estado_general) {
-          const select = document.querySelector('select[name="estado_general"]');
-          if (select) select.value = datos.estado_general;
-        }
-        
-        // Observaciones del centro
-        if (datos.Observaciones_Centro) {
-          const textarea = document.getElementById('campoObservaciones');
-          if (textarea) {
-            textarea.value = datos.Observaciones_Centro;
-            actualizarContadorObservaciones(textarea);
-          }
-        }
-        
-        console.log("✅ Datos guardados cargados");
-      } catch (error) {
-        console.error("Error cargando datos:", error);
-      }
+    // También ejecutar inmediatamente por si el DOM ya está listo
+    if (document.readyState === 'complete') {
+      generarEstancias();
     }
-
-    // ==================== 6. ATAJOS
+  </script>
+</body>
+</html>
