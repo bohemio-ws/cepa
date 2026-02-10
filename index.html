@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -45,11 +45,125 @@
       animation: spin 1s linear infinite;
       display: none;
     }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    @keyframes spin { 
+      0% { transform: rotate(0deg); } 
+      100% { transform: rotate(360deg); } 
+    }
+    
+    /* Animación para el área de observaciones */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    /* ==================== OPTIMIZACIONES MÓVILES ==================== */
+    @media (max-width: 640px) {
+      /* 1. MEJORAR ÁREAS TÁCTILES (accesibilidad) */
+      .room-label {
+        padding: 18px 14px !important;
+        min-height: 64px;
+      }
+      
+      /* 2. BOTÓN DE OBSERVACIONES MÁS TÁCTIL */
+      #toggleObservaciones {
+        padding: 20px 16px !important;
+        margin: 8px 0;
+      }
+      
+      /* 3. EVITAR ZOOM AUTOMÁTICO EN iOS (usabilidad) */
+      textarea, 
+      select, 
+      input[type="text"] {
+        font-size: 16px !important;
+      }
+      
+      /* 4. SEGURIDAD PARA iPhone NOTCH/DYNAMIC ISLAND */
+      .fixed.bottom-0 {
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+      }
+      
+      /* 5. MEJORAR VISUALIZACIÓN DE ESTANCIAS */
+      #rooms-container {
+        gap: 12px;
+      }
+      
+      .glass-card {
+        border-radius: 20px;
+      }
+      
+      /* 6. ICONOS MÁS GRANDES PARA MÓVIL */
+      .room-label span.text-2xl {
+        font-size: 28px;
+        min-width: 40px;
+      }
+      
+      /* 7. ÁREA DE OBSERVACIONES MÓVIL */
+      #contenedorObservaciones textarea {
+        min-height: 120px;
+      }
+      
+      /* 8. HEADER COMPACTO PARA MÓVIL */
+      .bg-gradient-to-r.from-blue-600.to-indigo-700 {
+        padding: 20px 16px !important;
+        border-radius: 0 0 28px 28px !important;
+      }
+      
+      /* 9. MEJORAR BOTÓN DE ENVIAR EN MÓVIL */
+      #submitBtn {
+        padding-top: 18px !important;
+        padding-bottom: 18px !important;
+      }
+    }
+
+    /* 10. ANIMACIÓN SUAVE AL DESPLAZAR (mejor UX) */
+    @media (hover: none) and (pointer: coarse) {
+      html {
+        scroll-behavior: smooth;
+      }
+      
+      /* Feedback táctil mejorado */
+      button:active, .room-label:active {
+        transform: scale(0.98) !important;
+        transition: transform 0.1s !important;
+      }
+    }
+
+    /* 11. MEJORAR MODAL EN PANTALLAS PEQUEÑAS */
+    @media (max-width: 480px) {
+      #successModal > div {
+        width: 90vw !important;
+        margin: 20px !important;
+        padding: 24px 20px !important;
+      }
+      
+      #successModal .text-6xl {
+        font-size: 4rem !important;
+      }
+    }
+
+    /* 12. PREVENIR DESBORDAMIENTOS EN TEXTOS LARGOS */
+    .room-label span.font-bold {
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+
+    /* 13. ESTADO DE CARGA MÁS VISIBLE EN MÓVIL */
+    #loader {
+      width: 28px;
+      height: 28px;
+      border-width: 3px;
+    }
   </style>
 </head>
 <body class="pb-32">
 
+  <!-- HEADER -->
   <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-b-3xl shadow-lg mb-6">
     <div class="flex justify-between items-center">
       <div>
@@ -62,8 +176,10 @@
     </div>
   </div>
 
+  <!-- FORMULARIO PRINCIPAL -->
   <form id="cleaningForm" class="max-w-md mx-auto px-4 space-y-4">
     
+    <!-- ESTADO GENERAL -->
     <div class="glass-card p-5 rounded-2xl shadow-md border-l-8 border-yellow-400">
       <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Estado del Centro</label>
       <select name="estado_general" class="w-full p-3 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-blue-500 font-semibold text-gray-800">
@@ -73,10 +189,70 @@
       </select>
     </div>
 
+    <!-- LISTA DE ESTANCIAS -->
     <div id="rooms-container" class="grid grid-cols-1 gap-4">
       <!-- Generado por JS -->
     </div>
 
+    <!-- BOTÓN DE OBSERVACIONES DEL CENTRO -->
+    <div class="mt-6">
+      <button 
+        type="button"
+        id="toggleObservaciones"
+        class="w-full glass-card p-5 rounded-2xl shadow-md border-l-8 border-cyan-500 hover:shadow-lg transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-cyan-400"
+        aria-expanded="false"
+        aria-controls="contenedorObservaciones">
+        
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <div class="bg-gradient-to-r from-cyan-500 to-blue-500 p-3 rounded-full shadow-sm">
+              <span class="text-xl text-white">📝</span>
+            </div>
+            <div class="text-left">
+              <h3 class="font-extrabold text-gray-800 text-lg tracking-tight">Observaciones del Centro</h3>
+              <p class="text-sm text-gray-600 mt-0.5">Comentarios generales sobre la jornada</p>
+            </div>
+          </div>
+          
+          <span id="iconoObservaciones" 
+            class="text-gray-500 text-2xl transform transition-transform duration-300 group-hover:scale-110">
+            ▼
+          </span>
+        </div>
+      </button>
+
+      <!-- ÁREA DE TEXTO OCULTA -->
+      <div id="contenedorObservaciones" 
+        class="hidden mt-4 glass-card p-5 rounded-2xl shadow-sm border-t border-gray-100 animate-fadeIn">
+        
+        <div class="mb-4">
+          <label for="campoObservaciones" class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">
+            📋 Detalles importantes
+          </label>
+          <p class="text-xs text-gray-500 mb-3">Estas observaciones se compartirán con el equipo directivo.</p>
+        </div>
+        
+        <textarea
+          id="campoObservaciones"
+          name="Observaciones_Centro"
+          rows="4"
+          maxlength="500"
+          placeholder="Ejemplo: • Cristales de la entrada necesitan limpieza exterior.
+• Aula de informática: ratón inalámbrico sin batería.
+• Material de limpieza bajo en el almacén (reponer fregonas)..."
+          class="w-full p-4 rounded-xl bg-gray-50/70 border-none focus:ring-2 focus:ring-cyan-500 focus:bg-white obs-input font-medium text-gray-700 placeholder-gray-400 transition-all resize-y"
+          oninput="actualizarContadorObservaciones(this)"></textarea>
+        
+        <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
+          <p class="text-xs text-gray-400 flex items-center">
+            <span class="mr-1">💡</span> Puedes usar puntos para listar incidencias
+          </p>
+          <span id="contadorObservaciones" class="text-xs font-semibold text-gray-500">0/500</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOTOS -->
     <div class="glass-card p-5 rounded-2xl shadow-md border-l-8 border-purple-500 mb-6">
       <label class="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">📸 Fotos de hoy</label>
       <input type="file" id="photoInput" accept="image/*" capture="environment" multiple 
@@ -84,6 +260,7 @@
       <div id="photoCount" class="text-xs text-gray-500 mt-2"></div>
     </div>
 
+    <!-- BOTÓN ENVIAR (FIXED) -->
     <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-gray-100 flex justify-center">
       <button type="submit" id="submitBtn" class="w-full max-w-md bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center space-x-3">
         <span>ENVIAR REPORTE DIARIO</span>
@@ -92,6 +269,7 @@
     </div>
   </form>
 
+  <!-- MODAL DE ÉXITO -->
   <div id="successModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-6 z-50">
     <div class="bg-white rounded-3xl p-8 text-center shadow-2xl transition-transform">
       <div class="text-6xl mb-4">🎉</div>
@@ -102,6 +280,7 @@
   </div>
 
   <script>
+    // ==================== CONFIGURACIÓN ====================
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzIiyEydpBKDFJv46y7PbuQ2F9K0NbCeJLcok6iCRwsoxd7gHxs8lunch8Rui58l3c/exec";
 
     const estancias = [
@@ -127,26 +306,235 @@
       { id: "CRISTALES_AULAS", label: "Cristales Aulas", icon: "🧼" }
     ];
 
-    const container = document.getElementById('rooms-container');
-
-    estancias.forEach(room => {
-      const card = document.createElement('div');
-      card.className = "glass-card p-4 rounded-2xl shadow-sm";
-      card.innerHTML = `
-        <div class="flex items-center space-x-4 mb-3">
-          <input type="checkbox" id="${room.id}" name="${room.id}_Check" class="hidden room-checkbox">
-          <label for="${room.id}" class="room-label flex-1 flex items-center p-3 rounded-xl border-2 border-gray-100 cursor-pointer transition-all active:scale-95">
-            <span class="text-2xl mr-3">${room.icon}</span>
-            <span class="font-bold text-gray-700">${room.label}</span>
-          </label>
-        </div>
-        <input type="text" name="${room.id}_Obs" placeholder="Observaciones..." 
-               class="obs-input w-full p-2 bg-transparent text-sm text-gray-600 focus:placeholder-transparent" />
-      `;
-      container.appendChild(card);
+    // ==================== INICIALIZACIÓN ====================
+    document.addEventListener('DOMContentLoaded', function() {
+      generarEstancias();
+      configurarObservaciones();
+      configurarFotos();
+      cargarDatosGuardados();
+      configurarAtajosTeclado();
     });
 
-    // Función para convertir archivos a Base64
+    // ==================== GENERAR ESTANCIAS ====================
+    function generarEstancias() {
+      const container = document.getElementById('rooms-container');
+      container.innerHTML = '';
+      
+      estancias.forEach(room => {
+        const card = document.createElement('div');
+        card.className = "glass-card p-4 rounded-2xl shadow-sm";
+        card.innerHTML = `
+          <div class="flex items-center space-x-4 mb-3">
+            <input type="checkbox" id="${room.id}" name="${room.id}_Check" class="hidden room-checkbox">
+            <label for="${room.id}" class="room-label flex-1 flex items-center p-3 rounded-xl border-2 border-gray-100 cursor-pointer transition-all active:scale-95">
+              <span class="text-2xl mr-3">${room.icon}</span>
+              <span class="font-bold text-gray-700">${room.label}</span>
+            </label>
+          </div>
+          <input type="text" name="${room.id}_Obs" placeholder="Observaciones..." 
+                 class="obs-input w-full p-2 bg-transparent text-sm text-gray-600 focus:placeholder-transparent" />
+        `;
+        container.appendChild(card);
+        
+        // Configurar evento para cada checkbox
+        const checkbox = card.querySelector('.room-checkbox');
+        const label = card.querySelector('.room-label');
+        
+        checkbox.addEventListener('change', function() {
+          guardarEstadoLocal();
+        });
+        
+        label.addEventListener('click', function(e) {
+          if (!e.target.matches('input')) {
+            guardarEstadoLocal();
+          }
+        });
+      });
+    }
+
+    // ==================== OBSERVACIONES DEL CENTRO ====================
+    function configurarObservaciones() {
+      const toggleBtn = document.getElementById('toggleObservaciones');
+      const contenedor = document.getElementById('contenedorObservaciones');
+      const icono = document.getElementById('iconoObservaciones');
+      const textarea = document.getElementById('campoObservaciones');
+
+      if (!toggleBtn || !contenedor || !icono || !textarea) return;
+
+      toggleBtn.addEventListener('click', function() {
+        const estaVisible = contenedor.classList.toggle('hidden');
+        
+        if (estaVisible) {
+          icono.style.transform = 'rotate(0deg)';
+          icono.textContent = '▼';
+        } else {
+          icono.style.transform = 'rotate(180deg)';
+          icono.textContent = '▲';
+          setTimeout(() => textarea.focus(), 50);
+        }
+        
+        toggleBtn.setAttribute('aria-expanded', !estaVisible);
+        guardarEstadoLocal();
+      });
+
+      textarea.addEventListener('input', function() {
+        actualizarContadorObservaciones(this);
+        guardarEstadoLocal();
+      });
+    }
+
+    function actualizarContadorObservaciones(textarea) {
+      const contador = document.getElementById('contadorObservaciones');
+      if (!contador) return;
+      
+      const longitud = textarea.value.length;
+      contador.textContent = `${longitud}/500`;
+      
+      if (longitud > 450) {
+        contador.className = 'text-xs font-bold text-red-500';
+      } else if (longitud > 400) {
+        contador.className = 'text-xs font-semibold text-amber-500';
+      } else {
+        contador.className = 'text-xs font-semibold text-gray-500';
+      }
+    }
+
+    // ==================== FOTOS ====================
+    function configurarFotos() {
+      const photoInput = document.getElementById('photoInput');
+      if (!photoInput) return;
+      
+      photoInput.addEventListener('change', function() {
+        const count = this.files.length;
+        const photoCount = document.getElementById('photoCount');
+        if (photoCount) {
+          photoCount.textContent = count === 0 ? 'No hay fotos seleccionadas' : 
+                                   count === 1 ? '1 foto seleccionada' : 
+                                   `${count} fotos seleccionadas`;
+        }
+        guardarEstadoLocal();
+      });
+    }
+
+    // ==================== GUARDADO LOCAL ====================
+    function guardarEstadoLocal() {
+      const form = document.getElementById('cleaningForm');
+      const formData = new FormData(form);
+      const estado = {};
+      
+      // Guardar checkboxes
+      estancias.forEach(room => {
+        const checkbox = document.getElementById(room.id);
+        estado[room.id + '_Check'] = checkbox ? checkbox.checked : false;
+      });
+      
+      // Guardar observaciones de estancias
+      estancias.forEach(room => {
+        const input = document.querySelector(`input[name="${room.id}_Obs"]`);
+        estado[room.id + '_Obs'] = input ? input.value : '';
+      });
+      
+      // Guardar estado general
+      const estadoGeneral = document.querySelector('select[name="estado_general"]');
+      estado.estado_general = estadoGeneral ? estadoGeneral.value : '';
+      
+      // Guardar observaciones del centro
+      const obsCentro = document.getElementById('campoObservaciones');
+      estado.Observaciones_Centro = obsCentro ? obsCentro.value : '';
+      
+      // Guardar info de fotos
+      const photoInput = document.getElementById('photoInput');
+      estado.fotos_count = photoInput ? photoInput.files.length : 0;
+      
+      localStorage.setItem('cepa_estado_guardado', JSON.stringify({
+        datos: estado,
+        timestamp: new Date().toISOString()
+      }));
+    }
+
+    function cargarDatosGuardados() {
+      const guardado = localStorage.getItem('cepa_estado_guardado');
+      if (!guardado) return;
+      
+      try {
+        const { datos } = JSON.parse(guardado);
+        
+        // Cargar checkboxes
+        estancias.forEach(room => {
+          const checkbox = document.getElementById(room.id);
+          if (checkbox && datos[room.id + '_Check'] !== undefined) {
+            checkbox.checked = datos[room.id + '_Check'];
+            // Disparar evento para actualizar estilo
+            checkbox.dispatchEvent(new Event('change'));
+          }
+        });
+        
+        // Cargar observaciones de estancias
+        estancias.forEach(room => {
+          const input = document.querySelector(`input[name="${room.id}_Obs"]`);
+          if (input && datos[room.id + '_Obs'] !== undefined) {
+            input.value = datos[room.id + '_Obs'];
+          }
+        });
+        
+        // Cargar estado general
+        const estadoGeneral = document.querySelector('select[name="estado_general"]');
+        if (estadoGeneral && datos.estado_general) {
+          estadoGeneral.value = datos.estado_general;
+        }
+        
+        // Cargar observaciones del centro
+        const obsCentro = document.getElementById('campoObservaciones');
+        if (obsCentro && datos.Observaciones_Centro !== undefined) {
+          obsCentro.value = datos.Observaciones_Centro;
+          actualizarContadorObservaciones(obsCentro);
+          
+          // Abrir observaciones si hay contenido
+          if (obsCentro.value.trim().length > 0) {
+            const toggleBtn = document.getElementById('toggleObservaciones');
+            if (toggleBtn) toggleBtn.click();
+          }
+        }
+        
+        console.log('📂 Datos guardados recuperados');
+      } catch (error) {
+        console.error('Error cargando datos guardados:', error);
+      }
+    }
+
+    // ==================== ATAJOS DE TECLADO ====================
+    function configurarAtajosTeclado() {
+      document.addEventListener('keydown', function(event) {
+        // Escape para cerrar observaciones
+        if (event.key === 'Escape') {
+          const contenedor = document.getElementById('contenedorObservaciones');
+          const icono = document.getElementById('iconoObservaciones');
+          const toggleBtn = document.getElementById('toggleObservaciones');
+          
+          if (contenedor && !contenedor.classList.contains('hidden')) {
+            contenedor.classList.add('hidden');
+            if (icono) {
+              icono.style.transform = 'rotate(0deg)';
+              icono.textContent = '▼';
+            }
+            if (toggleBtn) {
+              toggleBtn.setAttribute('aria-expanded', 'false');
+            }
+          }
+        }
+        
+        // Ctrl/Cmd + Enter para enviar
+        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+          event.preventDefault();
+          const submitBtn = document.getElementById('submitBtn');
+          if (submitBtn && !submitBtn.disabled) {
+            document.getElementById('cleaningForm').requestSubmit();
+          }
+        }
+      });
+    }
+
+    // ==================== ENVÍO DEL FORMULARIO ====================
     const toBase64 = file => new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -160,6 +548,8 @@
       const btn = document.getElementById('submitBtn');
       const loader = document.getElementById('loader');
       const photoInput = document.getElementById('photoInput');
+      
+      if (!btn || !loader) return;
       
       btn.disabled = true;
       btn.style.opacity = "0.7";
@@ -176,6 +566,7 @@
         }
       });
 
+      // Asegurar valores para todas las estancias
       estancias.forEach(room => {
         if (!data[room.id + '_Check']) data[room.id + '_Check'] = false;
         if (!data[room.id + '_Obs']) data[room.id + '_Obs'] = "";
@@ -186,12 +577,17 @@
       let base64Photos = [];
       if (files.length > 0) {
         for (let i = 0; i < files.length; i++) {
-          const b64 = await toBase64(files[i]);
-          base64Photos.push(b64);
+          try {
+            const b64 = await toBase64(files[i]);
+            base64Photos.push(b64);
+          } catch (error) {
+            console.error('Error procesando foto:', error);
+          }
         }
       }
-      data['URL_Fotos'] = base64Photos.join('|'); // Enviamos las fotos unidas por un separador
+      data['URL_Fotos'] = base64Photos.join('|');
 
+      // Enviar a Google Sheets
       try {
         await fetch(SCRIPT_URL, {
           method: 'POST',
@@ -201,14 +597,48 @@
           body: JSON.stringify(data)
         });
 
-        document.getElementById('successModal').style.display = 'flex';
+        // Mostrar confirmación y limpiar
+        mostrarConfirmacionExito(btn);
+        localStorage.removeItem('cepa_estado_guardado');
+        
       } catch (error) {
-        alert("Error al enviar: " + error);
+        console.error('Error al enviar:', error);
+        alert("Error al enviar el reporte. Por favor, inténtalo de nuevo.");
+        
         btn.disabled = false;
         btn.style.opacity = "1";
         loader.style.display = "none";
       }
     });
+
+    function mostrarConfirmacionExito(btn) {
+      // Ocultar modal existente si está visible
+      const modal = document.getElementById('successModal');
+      if (modal) {
+        modal.style.display = 'flex';
+      }
+      
+      // Feedback adicional en el botón
+      const originalHTML = btn.innerHTML;
+      const originalText = btn.querySelector('span').textContent;
+      
+      btn.querySelector('span').textContent = '✅ ¡ENVIADO!';
+      btn.style.background = 'linear-gradient(to right, #10b981, #059669)';
+      
+      // Restaurar después de 3 segundos
+      setTimeout(() => {
+        if (modal) {
+          modal.style.display = 'none';
+        }
+        location.reload();
+      }, 3000);
+    }
+
+    // ==================== AUTOGUARDADO EN MÓVIL ====================
+    if ('ontouchstart' in window) {
+      setInterval(guardarEstadoLocal, 30000); // Cada 30 segundos
+      console.log('📱 Autoguardado móvil activado');
+    }
   </script>
 </body>
 </html>
