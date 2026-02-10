@@ -50,6 +50,29 @@
       0% { transform: rotate(0deg); } 
       100% { transform: rotate(360deg); } 
     }
+    
+    /* Estilos para el botón de Google Fotos */
+    .btn-google-photos {
+      background: linear-gradient(135deg, #4285F4, #34A853, #FBBC05, #EA4335);
+      background-size: 400% 400%;
+      animation: gradient-shift 8s ease infinite;
+    }
+    
+    @keyframes gradient-shift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    .copied-message {
+      animation: fadeOut 2s forwards;
+    }
+    
+    @keyframes fadeOut {
+      0% { opacity: 1; }
+      70% { opacity: 1; }
+      100% { opacity: 0; }
+    }
   </style>
 </head>
 <body class="pb-32">
@@ -80,7 +103,7 @@
       </select>
     </div>
 
-    <!-- LISTA DE ESTANCIAS - IMPORTANTE: ESTO SE GENERA CON JS -->
+    <!-- LISTA DE ESTANCIAS -->
     <div id="rooms-container" class="grid grid-cols-1 gap-4">
       <!-- LAS 20 ESTANCIAS APARECERÁN AQUÍ -->
     </div>
@@ -100,7 +123,7 @@
             </div>
             <div class="text-left">
               <h3 class="font-extrabold text-gray-800 text-lg tracking-tight">Observaciones del Centro</h3>
-              <p class="text-sm text-gray-600 mt-0.5">Comentarios generales sobre la jornada</p>
+              <p class="text-sm text-gray-700 mt-0.5">Comentarios generales sobre la jornada</p>
             </div>
           </div>
           
@@ -115,7 +138,7 @@
           <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">
             📋 Detalles importantes
           </label>
-          <p class="text-xs text-gray-500 mb-3">Estas observaciones se compartirán con el equipo directivo.</p>
+          <p class="text-xs text-gray-600 mb-3">Estas observaciones se compartirán con el equipo directivo.</p>
         </div>
         
         <textarea
@@ -130,7 +153,7 @@
           oninput="actualizarContadorObservaciones(this)"></textarea>
         
         <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
-          <p class="text-xs text-gray-400 flex items-center">
+          <p class="text-xs text-gray-500 flex items-center">
             <span class="mr-1">💡</span> Usa puntos para listar
           </p>
           <span id="contadorObservaciones" class="text-xs font-semibold text-gray-500">0/500</span>
@@ -138,12 +161,88 @@
       </div>
     </div>
 
-    <!-- FOTOS -->
+    <!-- 📸 NUEVA SECCIÓN: GOOGLE FOTOS (REEMPLAZA LA ANTERIOR) -->
     <div class="glass-card p-5 rounded-2xl shadow-md border-l-8 border-purple-500 mb-6">
-      <label class="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">📸 Fotos de hoy</label>
-      <input type="file" id="photoInput" accept="image/*" capture="environment" multiple 
-             class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
-      <div id="photoCount" class="text-xs text-gray-500 mt-2">No hay fotos seleccionadas</div>
+      <label class="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider flex items-center">
+        <span class="mr-2">📸</span> Fotos del Reporte
+        <span class="ml-auto text-xs font-normal bg-purple-100 text-purple-800 px-2 py-1 rounded-full">NUEVO</span>
+      </label>
+      
+      <p class="text-sm text-gray-600 mb-4">Sube las fotos a Google Fotos y pega el enlace compartido:</p>
+      
+      <!-- PASO 1: Botón para abrir Google Fotos -->
+      <div class="mb-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
+        <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+          <span class="mr-2">1️⃣</span> Subir a Google Fotos
+        </h4>
+        <p class="text-sm text-blue-700 mb-3">Haz clic para abrir Google Fotos y subir las imágenes:</p>
+        
+        <a href="https://photos.google.com/" 
+           target="_blank"
+           class="btn-google-photos text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center mb-2">
+          <span class="mr-2">📱</span>
+          Abrir Google Fotos
+          <span class="ml-2">→</span>
+        </a>
+        
+        <p class="text-xs text-blue-600 mt-2">
+          💡 Sube las fotos, haz clic en "Compartir" y copia el enlace
+        </p>
+      </div>
+      
+      <!-- PASO 2: Campo para pegar el enlace -->
+      <div class="mb-4 p-4 bg-green-50 rounded-xl border border-green-100">
+        <h4 class="font-semibold text-green-800 mb-2 flex items-center">
+          <span class="mr-2">2️⃣</span> Pegar Enlace Compartido
+        </h4>
+        
+        <div class="flex items-start mb-2">
+          <input type="url"
+                 id="googlePhotosLink"
+                 name="GooglePhotos_Link"
+                 placeholder="https://photos.google.com/share/..."
+                 class="flex-1 p-3 rounded-l-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500">
+          
+          <button type="button"
+                  onclick="copiarEnlace()"
+                  class="bg-green-600 hover:bg-green-700 text-white px-4 rounded-r-xl border border-green-700 flex items-center">
+            <span id="copyIcon">📋</span>
+          </button>
+        </div>
+        
+        <div id="copiedMessage" class="hidden text-xs text-green-600 font-semibold mt-1 copied-message">
+          ✅ Enlace copiado al portapapeles
+        </div>
+        
+        <div class="mt-3">
+          <label class="inline-flex items-center">
+            <input type="checkbox" 
+                   id="sinFotosCheckbox"
+                   class="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                   onchange="toggleEnlaceRequerido()">
+            <span class="ml-2 text-sm text-gray-700">No hay fotos hoy</span>
+          </label>
+        </div>
+        
+        <p class="text-xs text-gray-500 mt-3">
+          🔗 El enlace quedará guardado en el reporte para consultar las fotos después
+        </p>
+      </div>
+      
+      <!-- PASO 3: Vista previa (opcional) -->
+      <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+        <h4 class="font-semibold text-gray-700 mb-2 flex items-center">
+          <span class="mr-2">👁️</span> Vista Previa del Enlace
+        </h4>
+        
+        <div id="linkPreview" class="text-sm text-gray-500 italic">
+          No hay enlace para previsualizar
+        </div>
+        
+        <div class="mt-2 text-xs text-gray-400">
+          <span class="font-semibold">Formato recomendado:</span> https://photos.google.com/share/ABC123...
+        </div>
+      </div>
     </div>
 
     <!-- BOTÓN ENVIAR -->
@@ -157,11 +256,24 @@
 
   <!-- MODAL DE ÉXITO -->
   <div id="successModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-6 z-50">
-    <div class="bg-white rounded-3xl p-8 text-center shadow-2xl">
+    <div class="bg-white rounded-3xl p-8 text-center shadow-2xl max-w-sm w-full mx-4">
       <div class="text-6xl mb-4">🎉</div>
       <h2 class="text-2xl font-bold text-gray-800 mb-2">¡Reporte Enviado!</h2>
-      <p class="text-gray-600 mb-6">Los datos se han registrado en la hoja de cálculo.</p>
-      <button onclick="location.reload()" class="bg-green-500 text-white px-8 py-3 rounded-full font-bold shadow-lg">Continuar</button>
+      <p class="text-gray-600 mb-4">Los datos se han registrado correctamente.</p>
+      
+      <div id="successDetails" class="text-left bg-gray-50 p-4 rounded-lg mb-6 text-sm">
+        <p class="font-semibold text-green-600 mb-2">📋 Datos guardados:</p>
+        <ul class="space-y-1 text-gray-700">
+          <li>• Estado del centro</li>
+          <li>• 20 estancias verificadas</li>
+          <li>• Observaciones generales</li>
+          <li id="fotosGuardadas">• Enlace de fotos</li>
+        </ul>
+      </div>
+      
+      <button onclick="location.reload()" class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold shadow-lg transition-colors">
+        Nuevo Reporte
+      </button>
     </div>
   </div>
 
@@ -190,18 +302,14 @@
       { id: "CRISTALES_AULAS", label: "Cristales Aulas", icon: "🧼" }
     ];
 
-    // ============ 1. GENERAR LAS ESTANCIAS (ESTO ES LO MÁS IMPORTANTE) ============
+    // ============ CONFIGURACIÓN ============
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzIiyEydpBKDFJv46y7PbuQ2F9K0NbCeJLcok6iCRwsoxd7gHxs8lunch8Rui58l3c/exec";
+
+    // ============ 1. GENERAR ESTANCIAS ============
     function generarEstancias() {
       const container = document.getElementById('rooms-container');
+      if (!container) return;
       
-      if (!container) {
-        console.error("ERROR: No se encuentra el contenedor 'rooms-container'");
-        return;
-      }
-      
-      console.log("Generando " + estancias.length + " estancias...");
-      
-      // LIMPIAR Y GENERAR NUEVAS
       container.innerHTML = '';
       
       estancias.forEach(room => {
@@ -220,29 +328,29 @@
         `;
         container.appendChild(card);
       });
-      
-      console.log("✅ " + estancias.length + " estancias generadas correctamente");
     }
 
     // ============ 2. OBSERVACIONES DEL CENTRO ============
-    function toggleObservaciones() {
+    window.toggleObservaciones = function() {
       const contenedor = document.getElementById('contenedorObservaciones');
       const icono = document.getElementById('iconoObservaciones');
+      
+      if (!contenedor || !icono) return;
       
       if (contenedor.classList.contains('hidden')) {
         contenedor.classList.remove('hidden');
         icono.textContent = '▲';
-        icono.style.transform = 'rotate(180deg)';
-        document.getElementById('campoObservaciones').focus();
+        setTimeout(() => document.getElementById('campoObservaciones').focus(), 100);
       } else {
         contenedor.classList.add('hidden');
         icono.textContent = '▼';
-        icono.style.transform = 'rotate(0deg)';
       }
-    }
+    };
 
-    function actualizarContadorObservaciones(textarea) {
+    window.actualizarContadorObservaciones = function(textarea) {
       const contador = document.getElementById('contadorObservaciones');
+      if (!contador) return;
+      
       const longitud = textarea.value.length;
       contador.textContent = longitud + '/500';
       
@@ -253,96 +361,147 @@
       } else {
         contador.className = 'text-xs font-semibold text-gray-500';
       }
-    }
-
-    // ============ 3. CONFIGURAR FOTOS ============
-    document.getElementById('photoInput').addEventListener('change', function() {
-      const count = this.files.length;
-      const texto = count === 0 ? 'No hay fotos seleccionadas' : 
-                    count === 1 ? '1 foto seleccionada' : 
-                    count + ' fotos seleccionadas';
-      document.getElementById('photoCount').textContent = texto;
-    });
-
-    // ============ 4. CONFIGURAR ENVÍO ============
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzIiyEydpBKDFJv46y7PbuQ2F9K0NbCeJLcok6iCRwsoxd7gHxs8lunch8Rui58l3c/exec";
-
-    document.getElementById('cleaningForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const btn = document.getElementById('submitBtn');
-      const loader = document.getElementById('loader');
-      
-      btn.disabled = true;
-      btn.style.opacity = "0.7";
-      loader.style.display = "block";
-
-      // Recoger datos
-      const formData = new FormData(this);
-      const data = {};
-      
-      formData.forEach((value, key) => {
-        data[key] = key.includes('_Check') ? true : value;
-      });
-
-      // Asegurar todas las estancias
-      estancias.forEach(room => {
-        if (!data[room.id + '_Check']) data[room.id + '_Check'] = false;
-        if (!data[room.id + '_Obs']) data[room.id + '_Obs'] = "";
-      });
-
-      // Procesar fotos
-      const photoInput = document.getElementById('photoInput');
-      const files = photoInput.files;
-      let base64Photos = [];
-      
-      if (files.length > 0) {
-        for (let i = 0; i < files.length; i++) {
-          const b64 = await toBase64(files[i]);
-          base64Photos.push(b64);
-        }
-      }
-      data['URL_Fotos'] = base64Photos.join('|');
-
-      // Enviar
-      try {
-        await fetch(SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-
-        document.getElementById('successModal').style.display = 'flex';
-      } catch (error) {
-        alert("Error: " + error);
-        btn.disabled = false;
-        btn.style.opacity = "1";
-        loader.style.display = "none";
-      }
-    });
-
-    function toBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-      });
-    }
-
-    // ============ 5. INICIAR TODO CUANDO LA PÁGINA CARGUE ============
-    // ESTA ES LA PARTE MÁS IMPORTANTE - Se ejecuta automáticamente
-    window.onload = function() {
-      console.log("Página cargada, generando estancias...");
-      generarEstancias();
-      console.log("Aplicación lista. Deberías ver " + estancias.length + " estancias.");
     };
 
-    // También ejecutar inmediatamente por si el DOM ya está listo
-    if (document.readyState === 'complete') {
-      generarEstancias();
+    // ============ 3. FUNCIONES PARA GOOGLE FOTOS ============
+    function toggleEnlaceRequerido() {
+      const checkbox = document.getElementById('sinFotosCheckbox');
+      const input = document.getElementById('googlePhotosLink');
+      
+      if (checkbox.checked) {
+        input.disabled = true;
+        input.placeholder = "No se requieren fotos hoy";
+        input.value = "";
+        actualizarVistaPrevia("");
+      } else {
+        input.disabled = false;
+        input.placeholder = "https://photos.google.com/share/...";
+        input.focus();
+      }
     }
-  </script>
-</body>
-</html>
+
+    function actualizarVistaPrevia(enlace) {
+      const preview = document.getElementById('linkPreview');
+      if (!preview) return;
+      
+      if (!enlace || enlace.trim() === "") {
+        preview.innerHTML = '<span class="text-gray-400 italic">No hay enlace para previsualizar</span>';
+        return;
+      }
+      
+      // Acortar enlace para mostrar
+      const enlaceCorto = enlace.length > 50 ? enlace.substring(0, 50) + "..." : enlace;
+      
+      // Verificar si es un enlace de Google Photos
+      const esGooglePhotos = enlace.includes('photos.google.com');
+      
+      preview.innerHTML = `
+        <div class="flex items-start">
+          <span class="mr-2 ${esGooglePhotos ? 'text-green-500' : 'text-amber-500'}">${esGooglePhotos ? '✅' : '⚠️'}</span>
+          <div>
+            <a href="${enlace}" target="_blank" class="text-blue-600 hover:underline break-all">
+              ${enlaceCorto}
+            </a>
+            <div class="text-xs ${esGooglePhotos ? 'text-green-600' : 'text-amber-600'} mt-1">
+              ${esGooglePhotos ? 'Enlace válido de Google Photos' : 'Verifica que sea un enlace de Google Photos'}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function copiarEnlace() {
+      const input = document.getElementById('googlePhotosLink');
+      const mensaje = document.getElementById('copiedMessage');
+      const icono = document.getElementById('copyIcon');
+      
+      if (!input.value.trim()) {
+        alert("Primero pega un enlace en el campo");
+        input.focus();
+        return;
+      }
+      
+      // Copiar al portapapeles
+      input.select();
+      input.setSelectionRange(0, 99999); // Para móviles
+      
+      try {
+        navigator.clipboard.writeText(input.value).then(() => {
+          // Mostrar mensaje de éxito
+          mensaje.classList.remove('hidden');
+          icono.textContent = '✅';
+          
+          setTimeout(() => {
+            mensaje.classList.add('hidden');
+            icono.textContent = '📋';
+          }, 2000);
+        });
+      } catch (err) {
+        // Fallback para navegadores antiguos
+        document.execCommand('copy');
+        mensaje.classList.remove('hidden');
+        icono.textContent = '✅';
+        
+        setTimeout(() => {
+          mensaje.classList.add('hidden');
+          icono.textContent = '📋';
+        }, 2000);
+      }
+    }
+
+    // ============ 4. CONFIGURAR ENVÍO ============
+    function configurarEnvio() {
+      const form = document.getElementById('cleaningForm');
+      if (!form) return;
+      
+      // Actualizar vista previa cuando se escribe en el campo
+      const googlePhotosInput = document.getElementById('googlePhotosLink');
+      if (googlePhotosInput) {
+        googlePhotosInput.addEventListener('input', function() {
+          actualizarVistaPrevia(this.value);
+        });
+      }
+      
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const btn = document.getElementById('submitBtn');
+        const loader = document.getElementById('loader');
+        
+        if (!btn || !loader) return;
+        
+        // Validar enlace de fotos
+        const sinFotosCheck = document.getElementById('sinFotosCheckbox');
+        const googlePhotosLink = document.getElementById('googlePhotosLink');
+        
+        if (!sinFotosCheck.checked && (!googlePhotosLink.value || !googlePhotosLink.value.includes('photos.google.com'))) {
+          const confirmar = confirm("⚠️ ¿Estás seguro de enviar sin enlace de Google Photos?\n\nSi hay fotos hoy, es mejor subirlas primero.");
+          if (!confirmar) {
+            googlePhotosLink.focus();
+            return;
+          }
+        }
+        
+        // Deshabilitar botón
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+        loader.style.display = "block";
+        
+        try {
+          // Recoger datos del formulario
+          const formData = new FormData(this);
+          const data = {};
+          
+          // Procesar datos básicos
+          formData.forEach((value, key) => {
+            if (key.includes('_Check')) {
+              data[key] = value ? true : false;
+            } else {
+              data[key] = value;
+            }
+          });
+          
+          // Asegurar todas las estancias
+          estancias.forEach(room => {
+            if (!data.hasOwnProperty(room.id + '_Check')) {
+              data[room.id + '_Check'] =
