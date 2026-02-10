@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap');
-   
+    
     body {
       font-family: 'Outfit', sans-serif;
       background-color: #f0f4f8;
@@ -45,13 +45,12 @@
       animation: spin 1s linear infinite;
       display: none;
     }
-   
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    
+    @keyframes spin { 
+      0% { transform: rotate(0deg); } 
+      100% { transform: rotate(360deg); } 
     }
-   
-    /* Animación para el área de observaciones */
+    
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -59,101 +58,84 @@
     .animate-fadeIn {
       animation: fadeIn 0.3s ease-out;
     }
-   
-    /* ==================== OPTIMIZACIONES MÓVILES ==================== */
+    
     @media (max-width: 640px) {
-      /* 1. MEJORAR ÁREAS TÁCTILES (accesibilidad) */
       .room-label {
         padding: 18px 14px !important;
         min-height: 64px;
       }
-     
-      /* 2. BOTÓN DE OBSERVACIONES MÁS TÁCTIL */
+      
       #toggleObservaciones {
         padding: 20px 16px !important;
         margin: 8px 0;
       }
-     
-      /* 3. EVITAR ZOOM AUTOMÁTICO EN iOS (usabilidad) */
-      textarea,
-      select,
-      input[type="text"] {
+      
+      textarea, select, input[type="text"] {
         font-size: 16px !important;
       }
-     
-      /* 4. SEGURIDAD PARA iPhone NOTCH/DYNAMIC ISLAND */
+      
       .fixed.bottom-0 {
         padding-bottom: max(1rem, env(safe-area-inset-bottom));
         padding-left: env(safe-area-inset-left);
         padding-right: env(safe-area-inset-right);
       }
-     
-      /* 5. MEJORAR VISUALIZACIÓN DE ESTANCIAS */
+      
       #rooms-container {
         gap: 12px;
       }
-     
+      
       .glass-card {
         border-radius: 20px;
       }
-     
-      /* 6. ICONOS MÁS GRANDES PARA MÓVIL */
+      
       .room-label span.text-2xl {
         font-size: 28px;
         min-width: 40px;
       }
-     
-      /* 7. ÁREA DE OBSERVACIONES MÓVIL */
+      
       #contenedorObservaciones textarea {
         min-height: 120px;
       }
-     
-      /* 8. HEADER COMPACTO PARA MÓVIL */
+      
       .bg-gradient-to-r.from-blue-600.to-indigo-700 {
         padding: 20px 16px !important;
         border-radius: 0 0 28px 28px !important;
       }
-     
-      /* 9. MEJORAR BOTÓN DE ENVIAR EN MÓVIL */
+      
       #submitBtn {
         padding-top: 18px !important;
         padding-bottom: 18px !important;
       }
     }
 
-    /* 10. ANIMACIÓN SUAVE AL DESPLAZAR (mejor UX) */
     @media (hover: none) and (pointer: coarse) {
       html {
         scroll-behavior: smooth;
       }
-     
-      /* Feedback táctil mejorado */
+      
       button:active, .room-label:active {
         transform: scale(0.98) !important;
         transition: transform 0.1s !important;
       }
     }
 
-    /* 11. MEJORAR MODAL EN PANTALLAS PEQUEÑAS */
     @media (max-width: 480px) {
       #successModal > div {
         width: 90vw !important;
         margin: 20px !important;
         padding: 24px 20px !important;
       }
-     
+      
       #successModal .text-6xl {
         font-size: 4rem !important;
       }
     }
 
-    /* 12. PREVENIR DESBORDAMIENTOS EN TEXTOS LARGOS */
     .room-label span.font-bold {
       word-break: break-word;
       overflow-wrap: break-word;
     }
 
-    /* 13. ESTADO DE CARGA MÁS VISIBLE EN MÓVIL */
     #loader {
       width: 28px;
       height: 28px;
@@ -178,7 +160,7 @@
 
   <!-- FORMULARIO PRINCIPAL -->
   <form id="cleaningForm" class="max-w-md mx-auto px-4 space-y-4">
-   
+    
     <!-- ESTADO GENERAL -->
     <div class="glass-card p-5 rounded-2xl shadow-md border-l-8 border-yellow-400">
       <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Estado del Centro</label>
@@ -191,18 +173,18 @@
 
     <!-- LISTA DE ESTANCIAS -->
     <div id="rooms-container" class="grid grid-cols-1 gap-4">
-      <!-- Generado por JS -->
+      <!-- Las aulas se generarán AQUÍ con JavaScript -->
     </div>
 
     <!-- BOTÓN DE OBSERVACIONES DEL CENTRO -->
     <div class="mt-6">
-      <button
+      <button 
         type="button"
         id="toggleObservaciones"
         class="w-full glass-card p-5 rounded-2xl shadow-md border-l-8 border-cyan-500 hover:shadow-lg transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-cyan-400"
         aria-expanded="false"
         aria-controls="contenedorObservaciones">
-       
+        
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
             <div class="bg-gradient-to-r from-cyan-500 to-blue-500 p-3 rounded-full shadow-sm">
@@ -213,8 +195,8 @@
               <p class="text-sm text-gray-600 mt-0.5">Comentarios generales sobre la jornada</p>
             </div>
           </div>
-         
-          <span id="iconoObservaciones"
+          
+          <span id="iconoObservaciones" 
             class="text-gray-500 text-2xl transform transition-transform duration-300 group-hover:scale-110">
             ▼
           </span>
@@ -222,16 +204,16 @@
       </button>
 
       <!-- ÁREA DE TEXTO OCULTA -->
-      <div id="contenedorObservaciones"
+      <div id="contenedorObservaciones" 
         class="hidden mt-4 glass-card p-5 rounded-2xl shadow-sm border-t border-gray-100 animate-fadeIn">
-       
+        
         <div class="mb-4">
           <label for="campoObservaciones" class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">
             📋 Detalles importantes
           </label>
           <p class="text-xs text-gray-500 mb-3">Estas observaciones se compartirán con el equipo directivo.</p>
         </div>
-       
+        
         <textarea
           id="campoObservaciones"
           name="Observaciones_Centro"
@@ -240,9 +222,8 @@
           placeholder="Ejemplo: • Cristales de la entrada necesitan limpieza exterior.
 • Aula de informática: ratón inalámbrico sin batería.
 • Material de limpieza bajo en el almacén (reponer fregonas)..."
-          class="w-full p-4 rounded-xl bg-gray-50/70 border-none focus:ring-2 focus:ring-cyan-500 focus:bg-white obs-input font-medium text-gray-700 placeholder-gray-400 transition-all resize-y"
-          oninput="actualizarContadorObservaciones(this)"></textarea>
-       
+          class="w-full p-4 rounded-xl bg-gray-50/70 border-none focus:ring-2 focus:ring-cyan-500 focus:bg-white obs-input font-medium text-gray-700 placeholder-gray-400 transition-all resize-y"></textarea>
+        
         <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
           <p class="text-xs text-gray-400 flex items-center">
             <span class="mr-1">💡</span> Puedes usar puntos para listar incidencias
@@ -255,7 +236,7 @@
     <!-- FOTOS -->
     <div class="glass-card p-5 rounded-2xl shadow-md border-l-8 border-purple-500 mb-6">
       <label class="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">📸 Fotos de hoy</label>
-      <input type="file" id="photoInput" accept="image/*" capture="environment" multiple
+      <input type="file" id="photoInput" accept="image/*" capture="environment" multiple 
              class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
       <div id="photoCount" class="text-xs text-gray-500 mt-2"></div>
     </div>
@@ -306,20 +287,42 @@
       { id: "CRISTALES_AULAS", label: "Cristales Aulas", icon: "🧼" }
     ];
 
-    // ==================== INICIALIZACIÓN ====================
-    document.addEventListener('DOMContentLoaded', function() {
-      generarEstancias();
-      configurarObservaciones();
-      configurarFotos();
+    // ==================== INICIALIZACIÓN PRINCIPAL ====================
+    // Este es el PUNTO DE ENTRADA - se ejecuta cuando la página está lista
+    function inicializarApp() {
+      console.log("🔄 Inicializando aplicación CEPA...");
+      
+      // 1. GENERAR TODAS LAS AULAS/ESTANCIAS
+      generarTodasLasEstancias();
+      
+      // 2. CONFIGURAR BOTÓN DE OBSERVACIONES
+      configurarObservacionesCentro();
+      
+      // 3. CONFIGURAR FOTOS
+      configurarInputFotos();
+      
+      // 4. CONFIGURAR ENVÍO DEL FORMULARIO
+      configurarEnvioFormulario();
+      
+      // 5. CARGAR DATOS GUARDADOS (si los hay)
       cargarDatosGuardados();
+      
+      // 6. CONFIGURAR ATAJOS DE TECLADO
       configurarAtajosTeclado();
-    });
+      
+      console.log("✅ Aplicación inicializada correctamente");
+    }
 
-    // ==================== GENERAR ESTANCIAS ====================
-    function generarEstancias() {
+    // ==================== 1. GENERAR ESTANCIAS ====================
+    function generarTodasLasEstancias() {
       const container = document.getElementById('rooms-container');
-      container.innerHTML = '';
-     
+      if (!container) {
+        console.error("❌ No se encontró el contenedor de estancias");
+        return;
+      }
+      
+      container.innerHTML = ''; // Limpiar por si acaso
+      
       estancias.forEach(room => {
         const card = document.createElement('div');
         card.className = "glass-card p-4 rounded-2xl shadow-sm";
@@ -331,65 +334,60 @@
               <span class="font-bold text-gray-700">${room.label}</span>
             </label>
           </div>
-          <input type="text" name="${room.id}_Obs" placeholder="Observaciones..."
+          <input type="text" name="${room.id}_Obs" placeholder="Observaciones..." 
                  class="obs-input w-full p-2 bg-transparent text-sm text-gray-600 focus:placeholder-transparent" />
         `;
         container.appendChild(card);
-       
-        // Configurar evento para cada checkbox
-        const checkbox = card.querySelector('.room-checkbox');
-        const label = card.querySelector('.room-label');
-       
-        checkbox.addEventListener('change', function() {
-          guardarEstadoLocal();
-        });
-       
-        label.addEventListener('click', function(e) {
-          if (!e.target.matches('input')) {
-            guardarEstadoLocal();
-          }
-        });
       });
+      
+      console.log(`✅ Generadas ${estancias.length} estancias`);
     }
 
-    // ==================== OBSERVACIONES DEL CENTRO ====================
-    function configurarObservaciones() {
+    // ==================== 2. OBSERVACIONES DEL CENTRO ====================
+    function configurarObservacionesCentro() {
       const toggleBtn = document.getElementById('toggleObservaciones');
       const contenedor = document.getElementById('contenedorObservaciones');
       const icono = document.getElementById('iconoObservaciones');
       const textarea = document.getElementById('campoObservaciones');
-
-      if (!toggleBtn || !contenedor || !icono || !textarea) return;
-
+      
+      if (!toggleBtn || !contenedor || !icono || !textarea) {
+        console.warn("⚠️ Elementos de observaciones no encontrados");
+        return;
+      }
+      
+      // Configurar clic en el botón
       toggleBtn.addEventListener('click', function() {
         const estaVisible = contenedor.classList.toggle('hidden');
-       
+        
         if (estaVisible) {
+          // Si se oculta
           icono.style.transform = 'rotate(0deg)';
           icono.textContent = '▼';
         } else {
+          // Si se muestra
           icono.style.transform = 'rotate(180deg)';
           icono.textContent = '▲';
           setTimeout(() => textarea.focus(), 50);
         }
-       
+        
         toggleBtn.setAttribute('aria-expanded', !estaVisible);
-        guardarEstadoLocal();
       });
-
+      
+      // Configurar contador de caracteres
       textarea.addEventListener('input', function() {
         actualizarContadorObservaciones(this);
-        guardarEstadoLocal();
       });
+      
+      console.log("✅ Observaciones del centro configuradas");
     }
 
     function actualizarContadorObservaciones(textarea) {
       const contador = document.getElementById('contadorObservaciones');
       if (!contador) return;
-     
+      
       const longitud = textarea.value.length;
       contador.textContent = `${longitud}/500`;
-     
+      
       if (longitud > 450) {
         contador.className = 'text-xs font-bold text-red-500';
       } else if (longitud > 400) {
@@ -399,129 +397,167 @@
       }
     }
 
-    // ==================== FOTOS ====================
-    function configurarFotos() {
+    // ==================== 3. CONFIGURAR FOTOS ====================
+    function configurarInputFotos() {
       const photoInput = document.getElementById('photoInput');
-      if (!photoInput) return;
-     
+      if (!photoInput) {
+        console.warn("⚠️ Input de fotos no encontrado");
+        return;
+      }
+      
       photoInput.addEventListener('change', function() {
         const count = this.files.length;
         const photoCount = document.getElementById('photoCount');
         if (photoCount) {
-          photoCount.textContent = count === 0 ? 'No hay fotos seleccionadas' :
-                                   count === 1 ? '1 foto seleccionada' :
+          photoCount.textContent = count === 0 ? 'No hay fotos seleccionadas' : 
+                                   count === 1 ? '1 foto seleccionada' : 
                                    `${count} fotos seleccionadas`;
         }
-        guardarEstadoLocal();
       });
+      
+      console.log("✅ Input de fotos configurado");
     }
 
-    // ==================== GUARDADO LOCAL ====================
-    function guardarEstadoLocal() {
+    // ==================== 4. CONFIGURAR ENVÍO ====================
+    function configurarEnvioFormulario() {
       const form = document.getElementById('cleaningForm');
-      const formData = new FormData(form);
-      const estado = {};
-     
-      // Guardar checkboxes
-      estancias.forEach(room => {
-        const checkbox = document.getElementById(room.id);
-        estado[room.id + '_Check'] = checkbox ? checkbox.checked : false;
-      });
-     
-      // Guardar observaciones de estancias
-      estancias.forEach(room => {
-        const input = document.querySelector(`input[name="${room.id}_Obs"]`);
-        estado[room.id + '_Obs'] = input ? input.value : '';
-      });
-     
-      // Guardar estado general
-      const estadoGeneral = document.querySelector('select[name="estado_general"]');
-      estado.estado_general = estadoGeneral ? estadoGeneral.value : '';
-     
-      // Guardar observaciones del centro
-      const obsCentro = document.getElementById('campoObservaciones');
-      estado.Observaciones_Centro = obsCentro ? obsCentro.value : '';
-     
-      // Guardar info de fotos
-      const photoInput = document.getElementById('photoInput');
-      estado.fotos_count = photoInput ? photoInput.files.length : 0;
-     
-      localStorage.setItem('cepa_estado_guardado', JSON.stringify({
-        datos: estado,
-        timestamp: new Date().toISOString()
-      }));
+      if (!form) {
+        console.error("❌ Formulario no encontrado");
+        return;
+      }
+      
+      form.addEventListener('submit', manejarEnvioFormulario);
+      console.log("✅ Envío del formulario configurado");
     }
 
-    function cargarDatosGuardados() {
-      const guardado = localStorage.getItem('cepa_estado_guardado');
-      if (!guardado) return;
-     
+    async function manejarEnvioFormulario(e) {
+      e.preventDefault();
+      
+      const btn = document.getElementById('submitBtn');
+      const loader = document.getElementById('loader');
+      const photoInput = document.getElementById('photoInput');
+      
+      if (!btn || !loader) return;
+      
+      // Mostrar estado de carga
+      btn.disabled = true;
+      btn.style.opacity = "0.7";
+      loader.style.display = "block";
+
+      // Recoger datos del formulario
+      const formData = new FormData(document.getElementById('cleaningForm'));
+      const data = {};
+      
+      formData.forEach((value, key) => {
+        if (key.includes('_Check')) {
+          data[key] = true;
+        } else {
+          data[key] = value;
+        }
+      });
+
+      // Asegurar que todas las estancias tengan valores
+      estancias.forEach(room => {
+        if (!data[room.id + '_Check']) data[room.id + '_Check'] = false;
+        if (!data[room.id + '_Obs']) data[room.id + '_Obs'] = "";
+      });
+
+      // Procesar fotos
+      const files = photoInput.files;
+      let base64Photos = [];
+      if (files.length > 0) {
+        for (let i = 0; i < files.length; i++) {
+          try {
+            const b64 = await toBase64(files[i]);
+            base64Photos.push(b64);
+          } catch (error) {
+            console.error('Error procesando foto:', error);
+          }
+        }
+      }
+      data['URL_Fotos'] = base64Photos.join('|');
+
+      // Enviar a Google Sheets
       try {
-        const { datos } = JSON.parse(guardado);
-       
-        // Cargar checkboxes
-        estancias.forEach(room => {
-          const checkbox = document.getElementById(room.id);
-          if (checkbox && datos[room.id + '_Check'] !== undefined) {
-            checkbox.checked = datos[room.id + '_Check'];
-            // Disparar evento para actualizar estilo
-            checkbox.dispatchEvent(new Event('change'));
-          }
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          cache: 'no-cache',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
         });
-       
-        // Cargar observaciones de estancias
-        estancias.forEach(room => {
-          const input = document.querySelector(`input[name="${room.id}_Obs"]`);
-          if (input && datos[room.id + '_Obs'] !== undefined) {
-            input.value = datos[room.id + '_Obs'];
-          }
-        });
-       
-        // Cargar estado general
-        const estadoGeneral = document.querySelector('select[name="estado_general"]');
-        if (estadoGeneral && datos.estado_general) {
-          estadoGeneral.value = datos.estado_general;
-        }
-       
-        // Cargar observaciones del centro
-        const obsCentro = document.getElementById('campoObservaciones');
-        if (obsCentro && datos.Observaciones_Centro !== undefined) {
-          obsCentro.value = datos.Observaciones_Centro;
-          actualizarContadorObservaciones(obsCentro);
-         
-          // Abrir observaciones si hay contenido
-          if (obsCentro.value.trim().length > 0) {
-            const toggleBtn = document.getElementById('toggleObservaciones');
-            if (toggleBtn) toggleBtn.click();
-          }
-        }
-       
-        console.log('📂 Datos guardados recuperados');
+
+        // Mostrar éxito
+        mostrarConfirmacionExito();
+        
       } catch (error) {
-        console.error('Error cargando datos guardados:', error);
+        console.error('Error al enviar:', error);
+        alert("Error al enviar el reporte. Por favor, inténtalo de nuevo.");
+        
+        // Restaurar botón
+        btn.disabled = false;
+        btn.style.opacity = "1";
+        loader.style.display = "none";
       }
     }
 
-    // ==================== ATAJOS DE TECLADO ====================
-    function configurarAtajosTeclado() {
-      document.addEventListener('keydown', function(event) {
-        // Escape para cerrar observaciones
-        if (event.key === 'Escape') {
-          const contenedor = document.getElementById('contenedorObservaciones');
-          const icono = document.getElementById('iconoObservaciones');
-          const toggleBtn = document.getElementById('toggleObservaciones');
-         
-          if (contenedor && !contenedor.classList.contains('hidden')) {
-            contenedor.classList.add('hidden');
-            if (icono) {
-              icono.style.transform = 'rotate(0deg)';
-              icono.textContent = '▼';
-            }
-            if (toggleBtn) {
-              toggleBtn.setAttribute('aria-expanded', 'false');
-            }
+    // Función para convertir archivos a Base64
+    function toBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    function mostrarConfirmacionExito() {
+      const modal = document.getElementById('successModal');
+      if (modal) {
+        modal.style.display = 'flex';
+      }
+      
+      // También feedback en el botón
+      const btn = document.getElementById('submitBtn');
+      if (btn) {
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<span>✅ ¡ENVIADO!</span>';
+        btn.style.background = 'linear-gradient(to right, #10b981, #059669)';
+        
+        // Recargar después de 3 segundos
+        setTimeout(() => {
+          location.reload();
+        }, 3000);
+      }
+    }
+
+    // ==================== 5. CARGAR DATOS GUARDADOS ====================
+    function cargarDatosGuardados() {
+      try {
+        const guardado = localStorage.getItem('cepa_estado_guardado');
+        if (!guardado) return;
+        
+        const { datos } = JSON.parse(guardado);
+        
+        // Estado general
+        if (datos.estado_general) {
+          const select = document.querySelector('select[name="estado_general"]');
+          if (select) select.value = datos.estado_general;
+        }
+        
+        // Observaciones del centro
+        if (datos.Observaciones_Centro) {
+          const textarea = document.getElementById('campoObservaciones');
+          if (textarea) {
+            textarea.value = datos.Observaciones_Centro;
+            actualizarContadorObservaciones(textarea);
           }
         }
-       
-        // Ctrl/Cmd + Enter para enviar
-        if ((event.ctrlKey || event.metaKey) && even
+        
+        console.log("✅ Datos guardados cargados");
+      } catch (error) {
+        console.error("Error cargando datos:", error);
+      }
+    }
+
+    // ==================== 6. ATAJOS
