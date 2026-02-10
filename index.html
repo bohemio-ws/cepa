@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap');
-    
+   
     body {
       font-family: 'Outfit', sans-serif;
       background-color: #f0f4f8;
@@ -45,12 +45,12 @@
       animation: spin 1s linear infinite;
       display: none;
     }
-    
-    @keyframes spin { 
-      0% { transform: rotate(0deg); } 
-      100% { transform: rotate(360deg); } 
+   
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
-    
+   
     /* Animación para el área de observaciones */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-10px); }
@@ -59,7 +59,7 @@
     .animate-fadeIn {
       animation: fadeIn 0.3s ease-out;
     }
-    
+   
     /* ==================== OPTIMIZACIONES MÓVILES ==================== */
     @media (max-width: 640px) {
       /* 1. MEJORAR ÁREAS TÁCTILES (accesibilidad) */
@@ -67,53 +67,53 @@
         padding: 18px 14px !important;
         min-height: 64px;
       }
-      
+     
       /* 2. BOTÓN DE OBSERVACIONES MÁS TÁCTIL */
       #toggleObservaciones {
         padding: 20px 16px !important;
         margin: 8px 0;
       }
-      
+     
       /* 3. EVITAR ZOOM AUTOMÁTICO EN iOS (usabilidad) */
-      textarea, 
-      select, 
+      textarea,
+      select,
       input[type="text"] {
         font-size: 16px !important;
       }
-      
+     
       /* 4. SEGURIDAD PARA iPhone NOTCH/DYNAMIC ISLAND */
       .fixed.bottom-0 {
         padding-bottom: max(1rem, env(safe-area-inset-bottom));
         padding-left: env(safe-area-inset-left);
         padding-right: env(safe-area-inset-right);
       }
-      
+     
       /* 5. MEJORAR VISUALIZACIÓN DE ESTANCIAS */
       #rooms-container {
         gap: 12px;
       }
-      
+     
       .glass-card {
         border-radius: 20px;
       }
-      
+     
       /* 6. ICONOS MÁS GRANDES PARA MÓVIL */
       .room-label span.text-2xl {
         font-size: 28px;
         min-width: 40px;
       }
-      
+     
       /* 7. ÁREA DE OBSERVACIONES MÓVIL */
       #contenedorObservaciones textarea {
         min-height: 120px;
       }
-      
+     
       /* 8. HEADER COMPACTO PARA MÓVIL */
       .bg-gradient-to-r.from-blue-600.to-indigo-700 {
         padding: 20px 16px !important;
         border-radius: 0 0 28px 28px !important;
       }
-      
+     
       /* 9. MEJORAR BOTÓN DE ENVIAR EN MÓVIL */
       #submitBtn {
         padding-top: 18px !important;
@@ -126,7 +126,7 @@
       html {
         scroll-behavior: smooth;
       }
-      
+     
       /* Feedback táctil mejorado */
       button:active, .room-label:active {
         transform: scale(0.98) !important;
@@ -141,7 +141,7 @@
         margin: 20px !important;
         padding: 24px 20px !important;
       }
-      
+     
       #successModal .text-6xl {
         font-size: 4rem !important;
       }
@@ -178,7 +178,7 @@
 
   <!-- FORMULARIO PRINCIPAL -->
   <form id="cleaningForm" class="max-w-md mx-auto px-4 space-y-4">
-    
+   
     <!-- ESTADO GENERAL -->
     <div class="glass-card p-5 rounded-2xl shadow-md border-l-8 border-yellow-400">
       <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Estado del Centro</label>
@@ -196,13 +196,13 @@
 
     <!-- BOTÓN DE OBSERVACIONES DEL CENTRO -->
     <div class="mt-6">
-      <button 
+      <button
         type="button"
         id="toggleObservaciones"
         class="w-full glass-card p-5 rounded-2xl shadow-md border-l-8 border-cyan-500 hover:shadow-lg transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-cyan-400"
         aria-expanded="false"
         aria-controls="contenedorObservaciones">
-        
+       
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
             <div class="bg-gradient-to-r from-cyan-500 to-blue-500 p-3 rounded-full shadow-sm">
@@ -213,8 +213,8 @@
               <p class="text-sm text-gray-600 mt-0.5">Comentarios generales sobre la jornada</p>
             </div>
           </div>
-          
-          <span id="iconoObservaciones" 
+         
+          <span id="iconoObservaciones"
             class="text-gray-500 text-2xl transform transition-transform duration-300 group-hover:scale-110">
             ▼
           </span>
@@ -222,16 +222,16 @@
       </button>
 
       <!-- ÁREA DE TEXTO OCULTA -->
-      <div id="contenedorObservaciones" 
+      <div id="contenedorObservaciones"
         class="hidden mt-4 glass-card p-5 rounded-2xl shadow-sm border-t border-gray-100 animate-fadeIn">
-        
+       
         <div class="mb-4">
           <label for="campoObservaciones" class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">
             📋 Detalles importantes
           </label>
           <p class="text-xs text-gray-500 mb-3">Estas observaciones se compartirán con el equipo directivo.</p>
         </div>
-        
+       
         <textarea
           id="campoObservaciones"
           name="Observaciones_Centro"
@@ -242,7 +242,7 @@
 • Material de limpieza bajo en el almacén (reponer fregonas)..."
           class="w-full p-4 rounded-xl bg-gray-50/70 border-none focus:ring-2 focus:ring-cyan-500 focus:bg-white obs-input font-medium text-gray-700 placeholder-gray-400 transition-all resize-y"
           oninput="actualizarContadorObservaciones(this)"></textarea>
-        
+       
         <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
           <p class="text-xs text-gray-400 flex items-center">
             <span class="mr-1">💡</span> Puedes usar puntos para listar incidencias
@@ -255,7 +255,7 @@
     <!-- FOTOS -->
     <div class="glass-card p-5 rounded-2xl shadow-md border-l-8 border-purple-500 mb-6">
       <label class="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">📸 Fotos de hoy</label>
-      <input type="file" id="photoInput" accept="image/*" capture="environment" multiple 
+      <input type="file" id="photoInput" accept="image/*" capture="environment" multiple
              class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
       <div id="photoCount" class="text-xs text-gray-500 mt-2"></div>
     </div>
@@ -319,7 +319,7 @@
     function generarEstancias() {
       const container = document.getElementById('rooms-container');
       container.innerHTML = '';
-      
+     
       estancias.forEach(room => {
         const card = document.createElement('div');
         card.className = "glass-card p-4 rounded-2xl shadow-sm";
@@ -331,19 +331,19 @@
               <span class="font-bold text-gray-700">${room.label}</span>
             </label>
           </div>
-          <input type="text" name="${room.id}_Obs" placeholder="Observaciones..." 
+          <input type="text" name="${room.id}_Obs" placeholder="Observaciones..."
                  class="obs-input w-full p-2 bg-transparent text-sm text-gray-600 focus:placeholder-transparent" />
         `;
         container.appendChild(card);
-        
+       
         // Configurar evento para cada checkbox
         const checkbox = card.querySelector('.room-checkbox');
         const label = card.querySelector('.room-label');
-        
+       
         checkbox.addEventListener('change', function() {
           guardarEstadoLocal();
         });
-        
+       
         label.addEventListener('click', function(e) {
           if (!e.target.matches('input')) {
             guardarEstadoLocal();
@@ -363,7 +363,7 @@
 
       toggleBtn.addEventListener('click', function() {
         const estaVisible = contenedor.classList.toggle('hidden');
-        
+       
         if (estaVisible) {
           icono.style.transform = 'rotate(0deg)';
           icono.textContent = '▼';
@@ -372,7 +372,7 @@
           icono.textContent = '▲';
           setTimeout(() => textarea.focus(), 50);
         }
-        
+       
         toggleBtn.setAttribute('aria-expanded', !estaVisible);
         guardarEstadoLocal();
       });
@@ -386,10 +386,10 @@
     function actualizarContadorObservaciones(textarea) {
       const contador = document.getElementById('contadorObservaciones');
       if (!contador) return;
-      
+     
       const longitud = textarea.value.length;
       contador.textContent = `${longitud}/500`;
-      
+     
       if (longitud > 450) {
         contador.className = 'text-xs font-bold text-red-500';
       } else if (longitud > 400) {
@@ -403,13 +403,13 @@
     function configurarFotos() {
       const photoInput = document.getElementById('photoInput');
       if (!photoInput) return;
-      
+     
       photoInput.addEventListener('change', function() {
         const count = this.files.length;
         const photoCount = document.getElementById('photoCount');
         if (photoCount) {
-          photoCount.textContent = count === 0 ? 'No hay fotos seleccionadas' : 
-                                   count === 1 ? '1 foto seleccionada' : 
+          photoCount.textContent = count === 0 ? 'No hay fotos seleccionadas' :
+                                   count === 1 ? '1 foto seleccionada' :
                                    `${count} fotos seleccionadas`;
         }
         guardarEstadoLocal();
@@ -421,31 +421,31 @@
       const form = document.getElementById('cleaningForm');
       const formData = new FormData(form);
       const estado = {};
-      
+     
       // Guardar checkboxes
       estancias.forEach(room => {
         const checkbox = document.getElementById(room.id);
         estado[room.id + '_Check'] = checkbox ? checkbox.checked : false;
       });
-      
+     
       // Guardar observaciones de estancias
       estancias.forEach(room => {
         const input = document.querySelector(`input[name="${room.id}_Obs"]`);
         estado[room.id + '_Obs'] = input ? input.value : '';
       });
-      
+     
       // Guardar estado general
       const estadoGeneral = document.querySelector('select[name="estado_general"]');
       estado.estado_general = estadoGeneral ? estadoGeneral.value : '';
-      
+     
       // Guardar observaciones del centro
       const obsCentro = document.getElementById('campoObservaciones');
       estado.Observaciones_Centro = obsCentro ? obsCentro.value : '';
-      
+     
       // Guardar info de fotos
       const photoInput = document.getElementById('photoInput');
       estado.fotos_count = photoInput ? photoInput.files.length : 0;
-      
+     
       localStorage.setItem('cepa_estado_guardado', JSON.stringify({
         datos: estado,
         timestamp: new Date().toISOString()
@@ -455,10 +455,10 @@
     function cargarDatosGuardados() {
       const guardado = localStorage.getItem('cepa_estado_guardado');
       if (!guardado) return;
-      
+     
       try {
         const { datos } = JSON.parse(guardado);
-        
+       
         // Cargar checkboxes
         estancias.forEach(room => {
           const checkbox = document.getElementById(room.id);
@@ -468,7 +468,7 @@
             checkbox.dispatchEvent(new Event('change'));
           }
         });
-        
+       
         // Cargar observaciones de estancias
         estancias.forEach(room => {
           const input = document.querySelector(`input[name="${room.id}_Obs"]`);
@@ -476,26 +476,26 @@
             input.value = datos[room.id + '_Obs'];
           }
         });
-        
+       
         // Cargar estado general
         const estadoGeneral = document.querySelector('select[name="estado_general"]');
         if (estadoGeneral && datos.estado_general) {
           estadoGeneral.value = datos.estado_general;
         }
-        
+       
         // Cargar observaciones del centro
         const obsCentro = document.getElementById('campoObservaciones');
         if (obsCentro && datos.Observaciones_Centro !== undefined) {
           obsCentro.value = datos.Observaciones_Centro;
           actualizarContadorObservaciones(obsCentro);
-          
+         
           // Abrir observaciones si hay contenido
           if (obsCentro.value.trim().length > 0) {
             const toggleBtn = document.getElementById('toggleObservaciones');
             if (toggleBtn) toggleBtn.click();
           }
         }
-        
+       
         console.log('📂 Datos guardados recuperados');
       } catch (error) {
         console.error('Error cargando datos guardados:', error);
@@ -510,7 +510,7 @@
           const contenedor = document.getElementById('contenedorObservaciones');
           const icono = document.getElementById('iconoObservaciones');
           const toggleBtn = document.getElementById('toggleObservaciones');
-          
+         
           if (contenedor && !contenedor.classList.contains('hidden')) {
             contenedor.classList.add('hidden');
             if (icono) {
@@ -522,123 +522,6 @@
             }
           }
         }
-        
+       
         // Ctrl/Cmd + Enter para enviar
-        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
-          event.preventDefault();
-          const submitBtn = document.getElementById('submitBtn');
-          if (submitBtn && !submitBtn.disabled) {
-            document.getElementById('cleaningForm').requestSubmit();
-          }
-        }
-      });
-    }
-
-    // ==================== ENVÍO DEL FORMULARIO ====================
-    const toBase64 = file => new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
-    });
-
-    document.getElementById('cleaningForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const btn = document.getElementById('submitBtn');
-      const loader = document.getElementById('loader');
-      const photoInput = document.getElementById('photoInput');
-      
-      if (!btn || !loader) return;
-      
-      btn.disabled = true;
-      btn.style.opacity = "0.7";
-      loader.style.display = "block";
-
-      const formData = new FormData(this);
-      const data = {};
-      
-      formData.forEach((value, key) => {
-        if (key.includes('_Check')) {
-          data[key] = true;
-        } else {
-          data[key] = value;
-        }
-      });
-
-      // Asegurar valores para todas las estancias
-      estancias.forEach(room => {
-        if (!data[room.id + '_Check']) data[room.id + '_Check'] = false;
-        if (!data[room.id + '_Obs']) data[room.id + '_Obs'] = "";
-      });
-
-      // Procesar fotos
-      const files = photoInput.files;
-      let base64Photos = [];
-      if (files.length > 0) {
-        for (let i = 0; i < files.length; i++) {
-          try {
-            const b64 = await toBase64(files[i]);
-            base64Photos.push(b64);
-          } catch (error) {
-            console.error('Error procesando foto:', error);
-          }
-        }
-      }
-      data['URL_Fotos'] = base64Photos.join('|');
-
-      // Enviar a Google Sheets
-      try {
-        await fetch(SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          cache: 'no-cache',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-
-        // Mostrar confirmación y limpiar
-        mostrarConfirmacionExito(btn);
-        localStorage.removeItem('cepa_estado_guardado');
-        
-      } catch (error) {
-        console.error('Error al enviar:', error);
-        alert("Error al enviar el reporte. Por favor, inténtalo de nuevo.");
-        
-        btn.disabled = false;
-        btn.style.opacity = "1";
-        loader.style.display = "none";
-      }
-    });
-
-    function mostrarConfirmacionExito(btn) {
-      // Ocultar modal existente si está visible
-      const modal = document.getElementById('successModal');
-      if (modal) {
-        modal.style.display = 'flex';
-      }
-      
-      // Feedback adicional en el botón
-      const originalHTML = btn.innerHTML;
-      const originalText = btn.querySelector('span').textContent;
-      
-      btn.querySelector('span').textContent = '✅ ¡ENVIADO!';
-      btn.style.background = 'linear-gradient(to right, #10b981, #059669)';
-      
-      // Restaurar después de 3 segundos
-      setTimeout(() => {
-        if (modal) {
-          modal.style.display = 'none';
-        }
-        location.reload();
-      }, 3000);
-    }
-
-    // ==================== AUTOGUARDADO EN MÓVIL ====================
-    if ('ontouchstart' in window) {
-      setInterval(guardarEstadoLocal, 30000); // Cada 30 segundos
-      console.log('📱 Autoguardado móvil activado');
-    }
-  </script>
-</body>
-</html>
+        if ((event.ctrlKey || event.metaKey) && even
