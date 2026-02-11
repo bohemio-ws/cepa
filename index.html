@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CEPA Altomira - Control de Limpieza</title>
+  <title>CEPA Altomira - Control Diario de Limpieza</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap');
@@ -64,25 +64,27 @@
       100% { background-position: 0% 50%; }
     }
     
-    .copied-message {
-      animation: fadeOut 2s forwards;
-    }
-    
-    @keyframes fadeOut {
-      0% { opacity: 1; }
-      70% { opacity: 1; }
-      100% { opacity: 0; }
+    /* Estilo para destacar el nombre de Helena */
+    .helena-badge {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
     }
   </style>
 </head>
 <body class="pb-32">
 
-  <!-- HEADER -->
+  <!-- HEADER PERSONALIZADO PARA HELENA -->
   <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-b-3xl shadow-lg mb-6">
     <div class="flex justify-between items-center">
       <div>
         <h1 class="text-2xl font-extrabold tracking-tight">CEPA Altomira 🏫</h1>
-        <p class="text-blue-100 opacity-90 text-sm">¡Hola, Helena! 👋 Control Diario.</p>
+        <p class="text-blue-100 opacity-90 text-sm">
+          <span class="helena-badge px-2 py-1 rounded-md font-semibold">¡Hola, Helena! 👋</span>
+          <span class="ml-2">Control Diario de Limpieza</span>
+        </p>
+        <p class="text-xs text-blue-200 mt-1 opacity-80">
+          📧 Fotos: <span class="font-mono">helenabuitragoclm@gmail.com</span>
+        </p>
       </div>
       <div class="bg-white/20 p-3 rounded-full">
         <span class="text-2xl">🧹</span>
@@ -105,148 +107,129 @@
 
     <!-- LISTA DE ESTANCIAS -->
     <div id="rooms-container" class="grid grid-cols-1 gap-4">
-      <!-- LAS 20 ESTANCIAS APARECERÁN AQUÍ -->
+      <!-- Las 20 estancias se generarán aquí -->
     </div>
 
-    <!-- BOTÓN DE OBSERVACIONES DEL CENTRO -->
-    <div class="mt-6">
-      <button 
-        type="button"
-        id="toggleObservaciones"
-        class="w-full glass-card p-5 rounded-2xl shadow-md border-l-8 border-cyan-500 hover:shadow-lg transition-all duration-300 group"
-        onclick="toggleObservaciones()">
-        
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-4">
-            <div class="bg-gradient-to-r from-cyan-500 to-blue-500 p-3 rounded-full shadow-sm">
-              <span class="text-xl text-white">📝</span>
-            </div>
-            <div class="text-left">
-              <h3 class="font-extrabold text-gray-800 text-lg tracking-tight">Observaciones del Centro</h3>
-              <p class="text-sm text-gray-700 mt-0.5">Comentarios generales sobre la jornada</p>
-            </div>
-          </div>
-          
-          <span id="iconoObservaciones" class="text-gray-500 text-2xl">▼</span>
-        </div>
-      </button>
-
-      <!-- ÁREA DE TEXTO OCULTA -->
-      <div id="contenedorObservaciones" class="hidden mt-4 glass-card p-5 rounded-2xl shadow-sm">
-        
-        <div class="mb-4">
-          <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">
-            📋 Detalles importantes
-          </label>
-          <p class="text-xs text-gray-600 mb-3">Estas observaciones se compartirán con el equipo directivo.</p>
-        </div>
-        
-        <textarea
-          id="campoObservaciones"
-          name="Observaciones_Centro"
-          rows="4"
-          maxlength="500"
-          placeholder="Ejemplo: • Cristales de la entrada necesitan limpieza exterior.
+    <!-- OBSERVACIONES DEL CENTRO - SIEMPRE VISIBLE -->
+    <div class="mt-6 glass-card p-5 rounded-2xl shadow-md border-l-8 border-cyan-500">
+      <div class="mb-4">
+        <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider flex items-center">
+          <span class="mr-2">📝</span> Observaciones del Centro
+        </label>
+        <p class="text-xs text-gray-600 mb-3">Comentarios generales sobre la jornada (se compartirán con el equipo directivo)</p>
+      </div>
+      
+      <textarea
+        id="campoObservaciones"
+        name="Observaciones_Centro"
+        rows="4"
+        maxlength="500"
+        placeholder="Ejemplo para Helena:
+• Cristales de la entrada necesitan limpieza exterior.
 • Aula de informática: ratón inalámbrico sin batería.
-• Material de limpieza bajo en el almacén..."
-          class="w-full p-4 rounded-xl bg-gray-50/70 border-none focus:ring-2 focus:ring-cyan-500 focus:bg-white obs-input font-medium text-gray-700 placeholder-gray-400"
-          oninput="actualizarContadorObservaciones(this)"></textarea>
-        
-        <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
-          <p class="text-xs text-gray-500 flex items-center">
-            <span class="mr-1">💡</span> Usa puntos para listar
-          </p>
-          <span id="contadorObservaciones" class="text-xs font-semibold text-gray-500">0/500</span>
-        </div>
+• Material de limpieza bajo en el almacén (reponer fregonas)..."
+        class="w-full p-4 rounded-xl bg-gray-50/70 border border-gray-200 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 font-medium text-gray-700 placeholder-gray-400"></textarea>
+      
+      <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-200">
+        <p class="text-xs text-gray-500 flex items-center">
+          <span class="mr-1">💡</span> Usa puntos para listar incidencias
+        </p>
+        <span id="contadorObservaciones" class="text-xs font-semibold text-gray-500">0/500</span>
       </div>
     </div>
 
-    <!-- 📸 NUEVA SECCIÓN: GOOGLE FOTOS (REEMPLAZA LA ANTERIOR) -->
+    <!-- SECCIÓN DE GOOGLE FOTOS PERSONALIZADA PARA HELENA -->
     <div class="glass-card p-5 rounded-2xl shadow-md border-l-8 border-purple-500 mb-6">
-      <label class="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider flex items-center">
-        <span class="mr-2">📸</span> Fotos del Reporte
-        <span class="ml-auto text-xs font-normal bg-purple-100 text-purple-800 px-2 py-1 rounded-full">NUEVO</span>
-      </label>
+      <div class="flex items-center justify-between mb-4">
+        <label class="block text-sm font-bold text-gray-700 uppercase tracking-wider flex items-center">
+          <span class="mr-2">📸</span> Fotos del Reporte - Helena
+        </label>
+        <span class="text-xs font-normal bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
+          Cuenta: helenabuitragoclm@gmail.com
+        </span>
+      </div>
       
-      <p class="text-sm text-gray-600 mb-4">Sube las fotos a Google Fotos y pega el enlace compartido:</p>
+      <p class="text-sm text-gray-600 mb-4">
+        Sube las fotos a tu Google Fotos (<span class="font-semibold">helenabuitragoclm@gmail.com</span>) y pega el enlace:
+      </p>
       
-      <!-- PASO 1: Botón para abrir Google Fotos -->
+      <!-- INSTRUCCIONES PASO A PASO -->
       <div class="mb-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
         <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
-          <span class="mr-2">1️⃣</span> Subir a Google Fotos
+          <span class="mr-2">📱</span> Instrucciones para Helena:
         </h4>
-        <p class="text-sm text-blue-700 mb-3">Haz clic para abrir Google Fotos y subir las imágenes:</p>
-        
+        <ol class="text-sm text-blue-700 space-y-2 ml-5 list-decimal">
+          <li><span class="font-semibold">Abre Google Fotos</span> con tu cuenta</li>
+          <li><span class="font-semibold">Sube las fotos</span> de hoy</li>
+          <li><span class="font-semibold">Haz clic en "Compartir"</span></li>
+          <li><span class="font-semibold">Copia el enlace</span> que se genera</li>
+          <li><span class="font-semibold">Pega aquí abajo</span> 👇</li>
+        </ol>
+      </div>
+      
+      <!-- BOTÓN DIRECTO A GOOGLE FOTOS DE HELENA -->
+      <div class="mb-4">
         <a href="https://photos.google.com/" 
            target="_blank"
-           class="btn-google-photos text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center mb-2">
-          <span class="mr-2">📱</span>
-          Abrir Google Fotos
+           class="btn-google-photos text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center mb-3">
+          <span class="mr-2">🚀</span>
+          Abrir MI Google Fotos (helenabuitragoclm@gmail.com)
           <span class="ml-2">→</span>
         </a>
-        
-        <p class="text-xs text-blue-600 mt-2">
-          💡 Sube las fotos, haz clic en "Compartir" y copia el enlace
+        <p class="text-xs text-center text-gray-500">
+          Se abrirá en una pestaña nueva. Asegúrate de estar con tu cuenta.
         </p>
       </div>
       
-      <!-- PASO 2: Campo para pegar el enlace -->
+      <!-- CAMPO PARA EL ENLACE -->
       <div class="mb-4 p-4 bg-green-50 rounded-xl border border-green-100">
         <h4 class="font-semibold text-green-800 mb-2 flex items-center">
-          <span class="mr-2">2️⃣</span> Pegar Enlace Compartido
+          <span class="mr-2">🔗</span> Pega tu enlace aquí:
         </h4>
         
-        <div class="flex items-start mb-2">
+        <div class="flex mb-2">
           <input type="url"
                  id="googlePhotosLink"
                  name="GooglePhotos_Link"
-                 placeholder="https://photos.google.com/share/..."
-                 class="flex-1 p-3 rounded-l-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                 placeholder="https://photos.google.com/share/ABC123..."
+                 class="flex-1 p-3 rounded-l-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                 title="Pega el enlace compartido de Google Photos">
           
           <button type="button"
                   onclick="copiarEnlace()"
-                  class="bg-green-600 hover:bg-green-700 text-white px-4 rounded-r-xl border border-green-700 flex items-center">
+                  class="bg-green-600 hover:bg-green-700 text-white px-4 rounded-r-xl border border-green-700 flex items-center"
+                  title="Copiar enlace">
             <span id="copyIcon">📋</span>
           </button>
         </div>
         
-        <div id="copiedMessage" class="hidden text-xs text-green-600 font-semibold mt-1 copied-message">
-          ✅ Enlace copiado al portapapeles
+        <!-- CHECKBOX SIN FOTOS -->
+        <div class="mt-3 flex items-center">
+          <input type="checkbox" 
+                 id="sinFotosCheckbox"
+                 class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+          <span class="ml-2 text-sm text-gray-700">No hay fotos hoy</span>
         </div>
         
-        <div class="mt-3">
-          <label class="inline-flex items-center">
-            <input type="checkbox" 
-                   id="sinFotosCheckbox"
-                   class="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                   onchange="toggleEnlaceRequerido()">
-            <span class="ml-2 text-sm text-gray-700">No hay fotos hoy</span>
-          </label>
+        <!-- INFO ADICIONAL -->
+        <div class="mt-3 p-2 bg-gray-100 rounded-lg">
+          <p class="text-xs text-gray-600">
+            <span class="font-semibold">💡 Para Helena:</span> Este enlace quedará guardado en el reporte. 
+            Puedes añadir más fotos al mismo álbum después si es necesario.
+          </p>
         </div>
-        
-        <p class="text-xs text-gray-500 mt-3">
-          🔗 El enlace quedará guardado en el reporte para consultar las fotos después
-        </p>
       </div>
       
-      <!-- PASO 3: Vista previa (opcional) -->
-      <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
-        <h4 class="font-semibold text-gray-700 mb-2 flex items-center">
-          <span class="mr-2">👁️</span> Vista Previa del Enlace
-        </h4>
-        
-        <div id="linkPreview" class="text-sm text-gray-500 italic">
-          No hay enlace para previsualizar
-        </div>
-        
-        <div class="mt-2 text-xs text-gray-400">
-          <span class="font-semibold">Formato recomendado:</span> https://photos.google.com/share/ABC123...
+      <!-- VISTA PREVIA DEL ENLACE -->
+      <div class="p-3 bg-gray-50 rounded-xl border border-gray-200">
+        <div id="linkPreview" class="text-sm">
+          <span class="text-gray-400 italic">Esperando enlace de Google Photos...</span>
         </div>
       </div>
     </div>
 
     <!-- BOTÓN ENVIAR -->
-    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-gray-100 flex justify-center">
+    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-gray-200 flex justify-center">
       <button type="submit" id="submitBtn" class="w-full max-w-md bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center space-x-3">
         <span>ENVIAR REPORTE DIARIO</span>
         <div id="loader" class="loader ml-3"></div>
@@ -254,26 +237,42 @@
     </div>
   </form>
 
-  <!-- MODAL DE ÉXITO -->
+  <!-- MODAL DE ÉXITO PERSONALIZADO -->
   <div id="successModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-6 z-50">
     <div class="bg-white rounded-3xl p-8 text-center shadow-2xl max-w-sm w-full mx-4">
       <div class="text-6xl mb-4">🎉</div>
-      <h2 class="text-2xl font-bold text-gray-800 mb-2">¡Reporte Enviado!</h2>
-      <p class="text-gray-600 mb-4">Los datos se han registrado correctamente.</p>
+      <h2 class="text-2xl font-bold text-gray-800 mb-2">¡Perfecto, Helena!</h2>
+      <p class="text-gray-600 mb-4">Reporte enviado correctamente.</p>
       
-      <div id="successDetails" class="text-left bg-gray-50 p-4 rounded-lg mb-6 text-sm">
-        <p class="font-semibold text-green-600 mb-2">📋 Datos guardados:</p>
+      <div class="text-left bg-gray-50 p-4 rounded-lg mb-6 text-sm">
+        <p class="font-semibold text-green-600 mb-2">📋 Resumen enviado:</p>
         <ul class="space-y-1 text-gray-700">
-          <li>• Estado del centro</li>
-          <li>• 20 estancias verificadas</li>
-          <li>• Observaciones generales</li>
-          <li id="fotosGuardadas">• Enlace de fotos</li>
+          <li class="flex items-center">
+            <span class="mr-2">✅</span>
+            <span>Estado del centro</span>
+          </li>
+          <li class="flex items-center">
+            <span class="mr-2">✅</span>
+            <span>20 estancias verificadas</span>
+          </li>
+          <li class="flex items-center">
+            <span class="mr-2">✅</span>
+            <span>Observaciones generales</span>
+          </li>
+          <li class="flex items-center" id="fotosStatus">
+            <span class="mr-2">✅</span>
+            <span>Enlace de fotos guardado</span>
+          </li>
         </ul>
       </div>
       
-      <button onclick="location.reload()" class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold shadow-lg transition-colors">
-        Nuevo Reporte
+      <button onclick="location.reload()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-3 rounded-xl font-bold shadow-lg transition-all">
+        Crear Nuevo Reporte
       </button>
+      
+      <p class="text-xs text-gray-400 mt-4">
+        Los datos se han guardado en la hoja de cálculo.
+      </p>
     </div>
   </div>
 
@@ -307,9 +306,15 @@
 
     // ============ 1. GENERAR ESTANCIAS ============
     function generarEstancias() {
-      const container = document.getElementById('rooms-container');
-      if (!container) return;
+      console.log("🔄 Generando estancias para Helena...");
       
+      const container = document.getElementById('rooms-container');
+      if (!container) {
+        console.error("❌ No se encuentra el contenedor");
+        return;
+      }
+      
+      // Limpiar y generar nuevas
       container.innerHTML = '';
       
       estancias.forEach(room => {
@@ -323,127 +328,126 @@
               <span class="font-bold text-gray-700">${room.label}</span>
             </label>
           </div>
-          <input type="text" name="${room.id}_Obs" placeholder="Observaciones..." 
+          <input type="text" name="${room.id}_Obs" placeholder="Observaciones específicas..." 
                  class="obs-input w-full p-2 bg-transparent text-sm text-gray-600 focus:placeholder-transparent" />
         `;
         container.appendChild(card);
       });
+      
+      console.log(`✅ ${estancias.length} estancias generadas para Helena`);
     }
 
-    // ============ 2. OBSERVACIONES DEL CENTRO ============
-    window.toggleObservaciones = function() {
-      const contenedor = document.getElementById('contenedorObservaciones');
-      const icono = document.getElementById('iconoObservaciones');
-      
-      if (!contenedor || !icono) return;
-      
-      if (contenedor.classList.contains('hidden')) {
-        contenedor.classList.remove('hidden');
-        icono.textContent = '▲';
-        setTimeout(() => document.getElementById('campoObservaciones').focus(), 100);
-      } else {
-        contenedor.classList.add('hidden');
-        icono.textContent = '▼';
-      }
-    };
-
-    window.actualizarContadorObservaciones = function(textarea) {
+    // ============ 2. CONFIGURAR OBSERVACIONES ============
+    function configurarObservaciones() {
+      const textarea = document.getElementById('campoObservaciones');
       const contador = document.getElementById('contadorObservaciones');
-      if (!contador) return;
       
-      const longitud = textarea.value.length;
-      contador.textContent = longitud + '/500';
+      if (!textarea || !contador) return;
       
-      if (longitud > 450) {
-        contador.className = 'text-xs font-bold text-red-500';
-      } else if (longitud > 400) {
-        contador.className = 'text-xs font-semibold text-amber-500';
-      } else {
-        contador.className = 'text-xs font-semibold text-gray-500';
-      }
-    };
-
-    // ============ 3. FUNCIONES PARA GOOGLE FOTOS ============
-    function toggleEnlaceRequerido() {
-      const checkbox = document.getElementById('sinFotosCheckbox');
-      const input = document.getElementById('googlePhotosLink');
-      
-      if (checkbox.checked) {
-        input.disabled = true;
-        input.placeholder = "No se requieren fotos hoy";
-        input.value = "";
-        actualizarVistaPrevia("");
-      } else {
-        input.disabled = false;
-        input.placeholder = "https://photos.google.com/share/...";
-        input.focus();
-      }
+      textarea.addEventListener('input', function() {
+        const longitud = this.value.length;
+        contador.textContent = `${longitud}/500`;
+        
+        // Cambiar color según longitud
+        if (longitud > 450) {
+          contador.className = 'text-xs font-bold text-red-500';
+        } else if (longitud > 400) {
+          contador.className = 'text-xs font-semibold text-amber-500';
+        } else {
+          contador.className = 'text-xs font-semibold text-gray-500';
+        }
+      });
     }
 
-    function actualizarVistaPrevia(enlace) {
-      const preview = document.getElementById('linkPreview');
-      if (!preview) return;
+    // ============ 3. CONFIGURAR GOOGLE FOTOS ============
+    function configurarGoogleFotos() {
+      const sinFotosCheckbox = document.getElementById('sinFotosCheckbox');
+      const googlePhotosInput = document.getElementById('googlePhotosLink');
+      const linkPreview = document.getElementById('linkPreview');
       
-      if (!enlace || enlace.trim() === "") {
-        preview.innerHTML = '<span class="text-gray-400 italic">No hay enlace para previsualizar</span>';
-        return;
-      }
+      if (!sinFotosCheckbox || !googlePhotosInput || !linkPreview) return;
       
-      // Acortar enlace para mostrar
-      const enlaceCorto = enlace.length > 50 ? enlace.substring(0, 50) + "..." : enlace;
+      // Toggle para "Sin fotos"
+      sinFotosCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+          googlePhotosInput.disabled = true;
+          googlePhotosInput.value = "";
+          linkPreview.innerHTML = '<span class="text-green-500">✅ No hay fotos hoy</span>';
+        } else {
+          googlePhotosInput.disabled = false;
+          googlePhotosInput.focus();
+          linkPreview.innerHTML = '<span class="text-gray-400 italic">Esperando enlace de Google Photos...</span>';
+        }
+      });
       
-      // Verificar si es un enlace de Google Photos
-      const esGooglePhotos = enlace.includes('photos.google.com');
-      
-      preview.innerHTML = `
-        <div class="flex items-start">
-          <span class="mr-2 ${esGooglePhotos ? 'text-green-500' : 'text-amber-500'}">${esGooglePhotos ? '✅' : '⚠️'}</span>
-          <div>
-            <a href="${enlace}" target="_blank" class="text-blue-600 hover:underline break-all">
-              ${enlaceCorto}
-            </a>
-            <div class="text-xs ${esGooglePhotos ? 'text-green-600' : 'text-amber-600'} mt-1">
-              ${esGooglePhotos ? 'Enlace válido de Google Photos' : 'Verifica que sea un enlace de Google Photos'}
+      // Actualizar vista previa en tiempo real
+      googlePhotosInput.addEventListener('input', function() {
+        const valor = this.value.trim();
+        
+        if (!valor) {
+          linkPreview.innerHTML = '<span class="text-gray-400 italic">Esperando enlace de Google Photos...</span>';
+          return;
+        }
+        
+        // Verificar si es un enlace de Google Photos
+        const esGooglePhotos = valor.includes('photos.google.com');
+        
+        if (esGooglePhotos) {
+          // Acortar para mostrar
+          const enlaceCorto = valor.length > 60 ? valor.substring(0, 60) + '...' : valor;
+          
+          linkPreview.innerHTML = `
+            <div class="flex items-start">
+              <span class="mr-2 text-green-500">✅</span>
+              <div>
+                <a href="${valor}" target="_blank" class="text-blue-600 hover:underline break-words">
+                  ${enlaceCorto}
+                </a>
+                <p class="text-xs text-green-600 mt-1">✓ Enlace válido de Google Photos</p>
+              </div>
             </div>
-          </div>
-        </div>
-      `;
+          `;
+        } else {
+          linkPreview.innerHTML = `
+            <div class="flex items-start">
+              <span class="mr-2 text-amber-500">⚠️</span>
+              <div>
+                <span class="text-gray-700 break-words">${valor}</span>
+                <p class="text-xs text-amber-600 mt-1">¿Es un enlace de Google Photos?</p>
+              </div>
+            </div>
+          `;
+        }
+      });
     }
 
+    // Función para copiar enlace
     function copiarEnlace() {
       const input = document.getElementById('googlePhotosLink');
-      const mensaje = document.getElementById('copiedMessage');
       const icono = document.getElementById('copyIcon');
       
       if (!input.value.trim()) {
-        alert("Primero pega un enlace en el campo");
+        alert("Helena, primero pega el enlace de Google Photos.");
         input.focus();
         return;
       }
       
       // Copiar al portapapeles
       input.select();
-      input.setSelectionRange(0, 99999); // Para móviles
+      input.setSelectionRange(0, 99999);
       
       try {
         navigator.clipboard.writeText(input.value).then(() => {
-          // Mostrar mensaje de éxito
-          mensaje.classList.remove('hidden');
           icono.textContent = '✅';
-          
           setTimeout(() => {
-            mensaje.classList.add('hidden');
             icono.textContent = '📋';
           }, 2000);
         });
       } catch (err) {
-        // Fallback para navegadores antiguos
+        // Fallback
         document.execCommand('copy');
-        mensaje.classList.remove('hidden');
         icono.textContent = '✅';
-        
         setTimeout(() => {
-          mensaje.classList.add('hidden');
           icono.textContent = '📋';
         }, 2000);
       }
@@ -454,54 +458,37 @@
       const form = document.getElementById('cleaningForm');
       if (!form) return;
       
-      // Actualizar vista previa cuando se escribe en el campo
-      const googlePhotosInput = document.getElementById('googlePhotosLink');
-      if (googlePhotosInput) {
-        googlePhotosInput.addEventListener('input', function() {
-          actualizarVistaPrevia(this.value);
-        });
-      }
-      
       form.addEventListener('submit', async function(e) {
         e.preventDefault();
+        console.log("📤 Helena está enviando el reporte...");
         
         const btn = document.getElementById('submitBtn');
         const loader = document.getElementById('loader');
+        const fotosStatus = document.getElementById('fotosStatus');
         
         if (!btn || !loader) return;
         
-        // Validar enlace de fotos
+        // Validar antes de enviar
         const sinFotosCheck = document.getElementById('sinFotosCheckbox');
         const googlePhotosLink = document.getElementById('googlePhotosLink');
         
         if (!sinFotosCheck.checked && (!googlePhotosLink.value || !googlePhotosLink.value.includes('photos.google.com'))) {
-          const confirmar = confirm("⚠️ ¿Estás seguro de enviar sin enlace de Google Photos?\n\nSi hay fotos hoy, es mejor subirlas primero.");
+          const confirmar = confirm("Helena, ¿estás segura de enviar sin enlace de Google Photos?\n\nSi hay fotos, es mejor subirlas primero.");
           if (!confirmar) {
             googlePhotosLink.focus();
             return;
           }
         }
         
-        // Deshabilitar botón
+        // Deshabilitar botón y mostrar loader
         btn.disabled = true;
         btn.style.opacity = "0.7";
         loader.style.display = "block";
         
         try {
-          // Recoger datos del formulario
+          // Recoger datos
           const formData = new FormData(this);
           const data = {};
           
-          // Procesar datos básicos
           formData.forEach((value, key) => {
-            if (key.includes('_Check')) {
-              data[key] = value ? true : false;
-            } else {
-              data[key] = value;
-            }
-          });
-          
-          // Asegurar todas las estancias
-          estancias.forEach(room => {
-            if (!data.hasOwnProperty(room.id + '_Check')) {
-              data[room.id + '_Check'] =
+            if (key.includes('_Chec
