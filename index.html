@@ -366,6 +366,32 @@
   <script>
     // TU URL DE GOOGLE APPS SCRIPT (completa)
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxF0R-b3ARABEiaRa5eXNOcKt4FunzsOb_nTljRzKWH0Ipzj7CcNsHpR7VAP9i6fHAW/exec";
+    async function enviarFormulario(form) {
+
+  const formData = new FormData(form);
+  const data = {};
+
+  formData.forEach((value, key) => {
+    data[key] = value;
+  });
+
+  try {
+
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify(data)
+    });
+
+    alert("✅ Reporte enviado correctamente");
+
+  } catch (error) {
+
+    alert("❌ Error enviando reporte");
+
+  }
+
+}
 
     document.addEventListener('DOMContentLoaded', function() {
       console.log("✅ Página cargada con 20 estancias");
@@ -399,3 +425,4 @@
           
 
           // Valida
+
