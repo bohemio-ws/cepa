@@ -339,39 +339,66 @@
   </div>
 
   <script>
-    // ✅ TU URL /exec (la que ya te da WEB APP OK)
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxF0R-b3ARABEiaRa5eXNOcKt4FunzsOb_nTljRzKWH0Ipzj7CcNsHpR7VAP9i6fHAW/exec";
+    // ✅ URL /exec que te muestra "WEB APP OK"
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxF0R-b3ARABEiaRa5eXNOcKt4FunzsOb_nTljRzKWH0Ipzj7CcNsHpR7VAP9i6fHAW/exec";
 
-    // Checkbox "sin fotos" -> deshabilita el link
-    document.addEventListener("DOMContentLoaded", () => {
-      const sinFotosCheckbox = document.getElementById("sinFotosCheckbox");
-      const googlePhotosInput = document.getElementById("googlePhotosLink");
-      if (sinFotosCheckbox && googlePhotosInput) {
-        sinFotosCheckbox.addEventListener("change", function () {
-          if (this.checked) {
-            googlePhotosInput.disabled = true;
-            googlePhotosInput.value = "";
-          } else {
-            googlePhotosInput.disabled = false;
-          }
-        });
-      }
+  // Checkbox "No hay fotos hoy" -> deshabilita el link
+  document.addEventListener("DOMContentLoaded", () => {
+    const sinFotosCheckbox = document.getElementById("sinFotosCheckbox");
+    const googlePhotosInput = document.getElementById("googlePhotosLink");
+
+    if (sinFotosCheckbox && googlePhotosInput) {
+      sinFotosCheckbox.addEventListener("change", function () {
+        if (this.checked) {
+          googlePhotosInput.disabled = true;
+          googlePhotosInput.value = "";
+        } else {
+          googlePhotosInput.disabled = false;
+        }
+      });
+    }
+  });
+
+  // ✅ ENVÍO ÚNICO Y REAL (sin duplicados, sin código cortado)
+  document.getElementById("cleaningForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const btn = document.getElementById("submitBtn");
+    const loader = document.getElementById("loader");
+    const modal = document.getElementById("successModal");
+
+    // UI: bloquea botón + loader
+    btn.disabled = true;
+    loader.style.display = "block";
+
+    // 1) Recoger datos del formulario
+    const formData = new FormData(this);
+    const data = {};
+    formData.forEach((value, key) => (data[key] = value));
+
+    // 2) Forzar que los checkbox no marcados vayan como false
+    this.querySelectorAll('input[type="checkbox"][name]').forEach(cb => {
+      if (!(cb.name in data)) data[cb.name] = false;
+      else data[cb.name] = true;
     });
 
-    // ✅ ENVÍO ÚNICO (sin duplicados, sin trozos cortados)
-    document.getElementById("cleaningForm").addEventListener("submit", async function (e) {
-      e.preventDefault();
+    try {
+      // 3) Enviar a Apps Script
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(data),
+      });
 
-      const btn = document.getElementById("submitBtn");
-      const loader = document.getElementById("loader");
-      btn.disabled = true;
-      loader.style.display = "block";
+      // 4) Mostrar modal de éxito (sin recargar)
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
 
-      // 1) Recoger datos
-      const formData = new FormData(this);
-      const data = {};
-      formData.forEach((value, key) => (data[key] = value));
-
-      // 2) Asegurar que los checkboxes NO marcados se envían como false
-      // (FormData no incluye unchecked)
-      this.querySelectorAll('input[type="checkbox"][name]').forEac
+    } catch (err) {
+      alert("❌ Error enviando. Revisa conexión/URL.");
+    } finally {
+      btn.disabled = false;
+      loader.style.display = "none";
+    }
+  });
+</script>
