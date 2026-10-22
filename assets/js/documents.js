@@ -1,0 +1,22 @@
+import {CONFIG} from './config.js';
+
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const text=s=>String(s??'').replace(/\s+/g,' ').trim();
+
+function shell(title,meta,body){return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><style>*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#292526;margin:0;background:#f4f0ef}.page{max-width:760px;margin:24px auto;background:#fff;padding:28px}.brand{border-top:8px solid #963b27;padding-top:18px}.brand small{letter-spacing:.12em;color:#963b27;font-weight:700}.brand h1{font-size:28px;margin:8px 0 16px}.meta{line-height:1.6;border-bottom:2px solid #963b27;padding-bottom:14px}.section{margin-top:22px}.section h2{font-size:17px;color:#78301f;border-bottom:1px solid #ddd;padding-bottom:7px}.box{white-space:pre-wrap;line-height:1.55;background:#faf7f6;border-left:4px solid #963b27;padding:14px}.test{margin:14px 0;padding:10px;background:#fff4d6;border:1px solid #d6a21e;font-weight:700}@media print{body{background:#fff}.page{margin:0;max-width:none}.test{display:none}}</style></head><body><main class="page"><header class="brand"><small>AYUNTAMIENTO DE TARANCÓN</small><h1>${esc(title)}</h1><div class="meta">${meta}</div></header>${CONFIG.testMode?'<div class="test">MODO PRUEBA · Documento no destinado a producción</div>':''}${body}</main></body></html>`}
+
+export function orderDocument(order){const date=new Date(order.createdAt).toLocaleDateString('es-ES');return shell('Solicitud de pedido',`<b>Referencia:</b> ${esc(order.id)}<br><b>Fecha:</b> ${esc(date)}<br><b>Proveedor / destinatario:</b> ${esc(order.supplier)}<br><b>Conserje:</b> Helena Buitrago Vara`,`<section class="section"><h2>Material solicitado</h2><div class="box">${esc(order.items)}</div></section>${order.notes?`<section class="section"><h2>Observaciones</h2><div class="box">${esc(order.notes)}</div></section>`:''}`)}
+
+export function reportDocument(reportHtml){return shell('Informe operativo',`<b>Fecha:</b> ${new Date().toLocaleDateString('es-ES')}<br><b>Centro:</b> CEPA Altomira<br><b>Conserje:</b> Helena Buitrago Vara`,`<section class="section">${reportHtml}</section>`)}
+
+export function openPrintable(html){const w=window.open('','_blank');if(!w)throw new Error('El navegador ha bloqueado la apertura del documento.');w.document.open();w.document.write(html);w.document.close();return w}
+
+function htmlFile(html,name){return new File([html],name,{type:'text/html;charset=utf-8'})}
+
+export async function shareDocument(html,name,title){const file=htmlFile(html,name);if(navigator.canShare?.({files:[file]})&&navigator.share){await navigator.share({title,files:[file]});return true}openPrintable(html);alert('Este navegador no permite adjuntar el documento directamente. Se ha abierto el documento para imprimir o guardar como PDF.');return false}
+
+export async function shareWhatsApp(html,name,title){const file=htmlFile(html,name);if(navigator.canShare?.({files:[file]})&&navigator.share){await navigator.share({title,text:'CEPA Altomira · Documento adjunto',files:[file]});return}openPrintable(html);alert('Guarda el documento como PDF y adjúntalo en WhatsApp. Nunca se compartirá el enlace de la aplicación.');}
+
+export function shareMail(html,name,title){const file=htmlFile(html,name);if(navigator.canShare?.({files:[file]})&&navigator.share){return navigator.share({title,text:`${CONFIG.testMode?'[PRUEBA] ':''}${title}`,files:[file]})}const subject=encodeURIComponent(`${CONFIG.testMode?'[PRUEBA] ':''}${title}`),body=encodeURIComponent('Se adjunta el documento generado por CEPA Altomira. Si el navegador no permite adjuntos automáticos, guárdalo como PDF y adjúntalo a este correo.');openPrintable(html);location.href=`mailto:${encodeURIComponent(CONFIG.testMode?CONFIG.testRecipient:'')}?subject=${subject}&body=${body}`;}
+
+export function safeName(prefix,id){return `${text(prefix).replace(/[^a-z0-9_-]+/gi,'_')}_${text(id).replace(/[^a-z0-9_-]+/gi,'_')}.html`}
