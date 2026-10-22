@@ -19,16 +19,17 @@ jobs:
         run: |
           python -m pip install --quiet pillow
           python - <<'PY'
-          from PIL import Image
+          from PIL import Image, ImageFile
           from pathlib import Path
-          src=Image.open('assets/img/escudo-tarancon.png').convert('RGBA')
+          ImageFile.LOAD_TRUNCATED_IMAGES = True
+          src=Image.open('assets/img/escudo-tarancon.png')
+          src.load()
+          src=src.convert('RGBA')
           out=Path('assets/icons'); out.mkdir(parents=True,exist_ok=True)
           for size in (192,512):
               canvas=Image.new('RGBA',(size,size),(247,243,241,255))
-              max_w=int(size*.82); max_h=int(size*.82)
-              im=src.copy(); im.thumbnail((max_w,max_h),Image.Resampling.LANCZOS)
-              x=(size-im.width)//2; y=(size-im.height)//2
-              canvas.alpha_composite(im,(x,y))
+              im=src.copy(); im.thumbnail((int(size*.82),int(size*.82)),Image.Resampling.LANCZOS)
+              canvas.alpha_composite(im,((size-im.width)//2,(size-im.height)//2))
               canvas.convert('RGB').save(out/f'cepa-{size}.png','PNG',optimize=True)
           PY
       - name: Commit generated icons
