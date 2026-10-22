@@ -1,5 +1,8 @@
 export const CONFIG = Object.freeze({
-  appName:'CEPA Altomira', city:'Tarancón', worker:'Helena Buitrago Vara', version:'3.1.0',
+  appName:'CEPA Altomira', city:'Tarancón', worker:'Helena Buitrago Vara', version:'3.2.0-TEST',
+  testMode:true,
+  testRecipient:'kennyclm@gmail.com',
+  productionRecipient:'rbenavente@tarancon.es',
   reportEndpoint:'https://script.google.com/macros/s/AKfycbxF0R-b3ARABEiaRa5eXNOcKt4FunzsOb_nTljRzKWH0Ipzj7CcNsHpR7VAP9i6fHAW/exec',
   oauthClientId:'172079845887-7uj01u2ptksn62l6cc8bjn1e0qi8akv7.apps.googleusercontent.com',
   authorizedEmail:'helenabuitragoclm@gmail.com',
@@ -15,7 +18,7 @@ export const CONFIG = Object.freeze({
     {id:'evidencias',icon:'▧',title:'Evidencias',subtitle:'Fotos vinculadas al trabajo'},
     {id:'incidencias',icon:'!',title:'Incidencias',subtitle:'Registrar y documentar'},
     {id:'almacen',icon:'▦',title:'Almacén y stock',subtitle:'Existencias y mínimos'},
-    {id:'pedidos',icon:'↗',title:'Pedidos',subtitle:'WhatsApp o correo'},
+    {id:'pedidos',icon:'↗',title:'Pedidos',subtitle:'Compartir documento PDF'},
     {id:'suministros',icon:'◉',title:'Suministros',subtitle:'Gasoil y entradas'},
     {id:'contactos',icon:'☎',title:'Contactos',subtitle:'Agenda de trabajo centralizada'},
     {id:'informes',icon:'▤',title:'Informe actual',subtitle:'Resumen completo'}
