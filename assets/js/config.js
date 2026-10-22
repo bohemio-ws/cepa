@@ -1,5 +1,5 @@
 export const CONFIG = Object.freeze({
-  appName:'CEPA Altomira', city:'Tarancón', worker:'Helena Buitrago Vara', version:'2.2.0',
+  appName:'CEPA Altomira', city:'Tarancón', worker:'Helena Buitrago Vara', version:'2.3.0',
   reportEndpoint:'https://script.google.com/macros/s/AKfycbxF0R-b3ARABEiaRa5eXNOcKt4FunzsOb_nTljRzKWH0Ipzj7CcNsHpR7VAP9i6fHAW/exec',
   storagePrefix:'cepa_v2_', maxPhotoMB:4,
   rooms:[
@@ -9,11 +9,12 @@ export const CONFIG = Object.freeze({
   ],
   modules:[
     {id:'trabajo',icon:'✓',title:'Trabajo diario',subtitle:'Checklist y parte de jornada'},
-    {id:'evidencias',icon:'▣',title:'Evidencias',subtitle:'Fotos vinculadas al trabajo'},
+    {id:'historico',icon:'▣',title:'Calendario e informes',subtitle:'Consultar partes anteriores'},
+    {id:'evidencias',icon:'▧',title:'Evidencias',subtitle:'Fotos vinculadas al trabajo'},
     {id:'incidencias',icon:'!',title:'Incidencias',subtitle:'Registrar y documentar'},
     {id:'almacen',icon:'▦',title:'Almacén y stock',subtitle:'Existencias y mínimos'},
     {id:'pedidos',icon:'↗',title:'Pedidos',subtitle:'WhatsApp o correo'},
     {id:'suministros',icon:'◉',title:'Suministros',subtitle:'Gasoil y entradas'},
-    {id:'informes',icon:'▤',title:'Informes',subtitle:'Resumen completo'}
+    {id:'informes',icon:'▤',title:'Informe actual',subtitle:'Resumen completo'}
   ]
 });
