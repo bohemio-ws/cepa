@@ -22,21 +22,24 @@ jobs:
           from PIL import Image, ImageFile
           from pathlib import Path
           ImageFile.LOAD_TRUNCATED_IMAGES = True
-          src=Image.open('assets/img/escudo-tarancon.png')
-          src.load()
-          src=src.convert('RGBA')
+          src=Image.open('assets/img/escudo-tarancon.png'); src.load(); src=src.convert('RGBA')
           out=Path('assets/icons'); out.mkdir(parents=True,exist_ok=True)
           for size in (192,512):
               canvas=Image.new('RGBA',(size,size),(247,243,241,255))
               im=src.copy(); im.thumbnail((int(size*.82),int(size*.82)),Image.Resampling.LANCZOS)
               canvas.alpha_composite(im,((size-im.width)//2,(size-im.height)//2))
               canvas.convert('RGB').save(out/f'cepa-{size}.png','PNG',optimize=True)
+          p=Path('index.html')
+          text=p.read_text(encoding='utf-8')
+          text=text.replace('href="assets/img/escudo-tarancon.png"','href="assets/icons/cepa-192.png"',1)
+          text=text.replace('href="assets/img/escudo-tarancon.png"','href="assets/icons/cepa-512.png"',1)
+          p.write_text(text,encoding='utf-8')
           PY
-      - name: Commit generated icons
+      - name: Commit generated PWA assets
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add assets/icons/cepa-192.png assets/icons/cepa-512.png
+          git add assets/icons/cepa-192.png assets/icons/cepa-512.png index.html
           git diff --cached --quiet && exit 0
-          git commit -m 'Build valid PWA icons for CEPA Altomira'
+          git commit -m 'Use valid CEPA icons for PWA and shortcuts'
           git push
