@@ -1,0 +1,41 @@
+name: Build PWA icons
+
+on:
+  push:
+    paths:
+      - 'assets/img/escudo-tarancon.png'
+      - '.github/workflows/build-pwa-icons.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-icons:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate square PWA icons from municipal artwork
+        run: |
+          python -m pip install --quiet pillow
+          python - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          src=Image.open('assets/img/escudo-tarancon.png').convert('RGBA')
+          out=Path('assets/icons'); out.mkdir(parents=True,exist_ok=True)
+          for size in (192,512):
+              canvas=Image.new('RGBA',(size,size),(247,243,241,255))
+              max_w=int(size*.82); max_h=int(size*.82)
+              im=src.copy(); im.thumbnail((max_w,max_h),Image.Resampling.LANCZOS)
+              x=(size-im.width)//2; y=(size-im.height)//2
+              canvas.alpha_composite(im,(x,y))
+              canvas.convert('RGB').save(out/f'cepa-{size}.png','PNG',optimize=True)
+          PY
+      - name: Commit generated icons
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/icons/cepa-192.png assets/icons/cepa-512.png
+          git diff --cached --quiet && exit 0
+          git commit -m 'Build valid PWA icons for CEPA Altomira'
+          git push
