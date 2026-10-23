@@ -1,5 +1,5 @@
 export const CONFIG = Object.freeze({
-  appName:'CEPA Altomira', city:'Tarancón', worker:'Helena Buitrago Vara', version:'3.2.0-TEST',
+  appName:'CEPA Altomira', city:'Tarancón', worker:'Helena Buitrago Vara', version:'3.3.0-TEST',
   testMode:true,
   testRecipient:'kennyclm@gmail.com',
   productionRecipient:'rbenavente@tarancon.es',
@@ -16,11 +16,11 @@ export const CONFIG = Object.freeze({
     {id:'trabajo',icon:'✓',title:'Trabajo diario',subtitle:'Checklist y parte de jornada'},
     {id:'historico',icon:'▣',title:'Calendario e informes',subtitle:'Consultar partes anteriores'},
     {id:'evidencias',icon:'▧',title:'Evidencias',subtitle:'Fotos vinculadas al trabajo'},
-    {id:'incidencias',icon:'!',title:'Incidencias',subtitle:'Registrar y documentar'},
+    {id:'incidencias',icon:'!',title:'Incidencias',subtitle:'Registrar, resolver y documentar'},
     {id:'almacen',icon:'▦',title:'Almacén y stock',subtitle:'Existencias y mínimos'},
-    {id:'pedidos',icon:'↗',title:'Pedidos',subtitle:'Compartir documento PDF'},
+    {id:'pedidos',icon:'↗',title:'Pedidos',subtitle:'Generar y compartir documento'},
     {id:'suministros',icon:'◉',title:'Suministros',subtitle:'Gasoil y entradas'},
     {id:'contactos',icon:'☎',title:'Contactos',subtitle:'Agenda de trabajo centralizada'},
-    {id:'informes',icon:'▤',title:'Informe actual',subtitle:'Resumen completo'}
+    {id:'informes',icon:'▤',title:'Informe actual',subtitle:'Resumen completo de la jornada'}
   ]
 });
