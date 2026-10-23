@@ -1,4 +1,4 @@
-const CACHE='cepa-altomira-v14-test';
+const CACHE='cepa-altomira-v15-test';
 const APP_SHELL=['./','./index.html','./manifest.webmanifest','./assets/css/app.css','./assets/js/bootstrap.js','./assets/js/auth.js','./assets/js/app.js','./assets/js/api.js','./assets/js/config.js','./assets/js/contacts.js','./assets/js/store.js','./assets/js/documents.js','./assets/js/document-actions.js','./assets/img/helena-profile.png','./assets/icons/ayto-tarancon-icon.svg'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(APP_SHELL)));self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))));self.clients.claim();});
