@@ -27,3 +27,5 @@ export const deleteEvidence=id=>request('delete_evidence',{id});
 export const createOrder=order=>request('order',order);
 export const generateReport=date=>request('report',{date});
 export const generateTestReport=date=>request('test_report',{date});
+export const generateIncidentPdf=id=>request('incident_pdf',{id});
+export const emailIncident=(id,recipient='')=>request('incident_mail',{id,recipient});
