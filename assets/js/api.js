@@ -1,35 +1,31 @@
 import {CONFIG} from './config.js';
-import {getCredential} from './auth.js';
 
-async function request(action,payload={}){
-  const credential=getCredential();
-  if(!credential)throw new Error('Sesión de Google no válida. Vuelve a identificarte.');
-  const response=await fetch(CONFIG.reportEndpoint,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({action,credential,...payload}),redirect:'follow',cache:'no-store'});
+async function getJson(params={}){
+  const url=new URL(CONFIG.reportEndpoint);
+  Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));
+  const response=await fetch(url.toString(),{method:'GET',cache:'no-store'});
   if(!response.ok)throw new Error(`Backend CEPA no disponible (${response.status})`);
   const data=await response.json();
-  if(!data?.ok){if(data?.error==='AUTH_REQUIRED'||data?.error==='AUTH_FORBIDDEN')throw new Error('Acceso no autorizado.');throw new Error(data?.error||'Respuesta inválida del backend CEPA')}
+  if(!data?.ok)throw new Error(data?.error||'Respuesta inválida del backend CEPA');
   return data;
 }
-export const getSession=()=>request('session');
-export const getHistory=date=>request('history',{date});
-export const getEvents=date=>request('events',{date});
-export const getEvidence=date=>request('evidence_list',{date});
-export const getNextOrder=date=>request('nextorder',{date});
-export const getContacts=()=>request('contacts');
-export const createContact=contact=>request('contact',contact);
-export const updateContact=contact=>request('update_contact',contact);
-export const deactivateContact=id=>request('delete_contact',{id});
-export const createEvent=event=>request('event',event);
-export const updateEvent=event=>request('update_event',event);
-export const deleteEvent=id=>request('delete_event',{id});
-export const createEvidence=evidence=>request('evidence',evidence);
-export const deleteEvidence=id=>request('delete_evidence',{id});
-export const createOrder=order=>request('order',order);
-export const generateReport=date=>request('report',{date});
-export const generateTestReport=date=>request('test_report',{date});
-export const generateIncidentPdf=id=>request('incident_pdf',{id});
-export const emailIncident=(id,recipient='')=>request('incident_mail',{id,recipient});
-export const generateOrderPdf=id=>request('order_pdf',{id});
-export const emailOrder=(id,recipient='')=>request('order_mail',{id,recipient});
-export const generateReportPdf=date=>request('report_pdf',{date});
-export const emailReport=(date,recipient='')=>request('report_mail',{date,recipient});
+
+export function getHistory(date){
+  return getJson({action:'history',date});
+}
+
+export function toLegacyDailyPayload(report){
+  const payload={estado_general:report.status,Observaciones_Centro:report.notes||'',GooglePhotos_Link:''};
+  for(const task of report.tasks){
+    const key=task.legacyId||task.id;
+    payload[`${key}_Obs`]=task.obs||'';
+    payload[`${key}_Check`]=Boolean(task.done);
+  }
+  return payload;
+}
+
+export async function postLegacyDaily(report){
+  const payload=toLegacyDailyPayload(report);
+  await fetch(CONFIG.reportEndpoint,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+  return payload;
+}
