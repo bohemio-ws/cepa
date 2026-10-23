@@ -1,5 +1,5 @@
 import {Store} from './store.js';
-import {updateEvent,deleteEvent,deleteEvidence,generateIncidentPdf,emailIncident,generateOrderPdf,emailOrder,generateReportPdf,emailReport} from './api.js';
+import {updateEvent,deleteEvent,deleteEvidence,generateIncidentPdf,emailIncident,generateOrderPdf,emailOrder,generateReportPdf} from './api.js';
 import {sharePdf,openPdf} from './documents.js';
 const day=()=>{const d=new Date(),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),n=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${n}`};
 const latestOrder=()=>Store.list('orders')[0]||null;
@@ -13,5 +13,6 @@ document.querySelector('#printOrder')?.addEventListener('click',async()=>{try{op
 document.querySelector('#shareWa')?.addEventListener('click',async()=>{try{await sharePdf(await orderPdf(),'CEPA Altomira · Pedido')}catch(e){fail(e)}});
 document.querySelector('#shareMail')?.addEventListener('click',async()=>{try{const r=await emailOrder(order().id);alert(`Pedido enviado por correo a ${r.recipient}.`)}catch(e){fail(e)}});
 document.querySelector('#printReport')?.addEventListener('click',async()=>{try{openPdf(await reportPdf())}catch(e){fail(e)}});
-document.querySelector('#shareReport')?.addEventListener('click',async()=>{try{await sharePdf(await reportPdf(),'CEPA Altomira · Informe operativo')}catch(e){fail(e)}});
+document.querySelector('#shareReportWa')?.addEventListener('click',async()=>{try{await sharePdf(await reportPdf(),'CEPA Altomira · Informe operativo')}catch(e){fail(e)}});
+document.querySelector('#shareReportMail')?.addEventListener('click',async()=>{try{await sharePdf(await reportPdf(),'CEPA Altomira · Informe operativo')}catch(e){fail(e)}});
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-inc-check],[data-inc-edit],[data-inc-delete],[data-inc-pdf],[data-inc-wa],[data-inc-mail]');if(!b)return;try{if(b.dataset.incCheck)await changeIncident(b.dataset.incCheck,'check');else if(b.dataset.incEdit)await changeIncident(b.dataset.incEdit,'edit');else if(b.dataset.incDelete)await changeIncident(b.dataset.incDelete,'delete');else if(b.dataset.incPdf)openPdf(await generateIncidentPdf(b.dataset.incPdf));else if(b.dataset.incWa)await sharePdf(await generateIncidentPdf(b.dataset.incWa),'CEPA Altomira · Parte de incidencia');else if(b.dataset.incMail){const r=await emailIncident(b.dataset.incMail);alert(`Parte enviado por correo a ${r.recipient}.`)}}catch(err){fail(err)}});
