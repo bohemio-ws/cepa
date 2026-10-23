@@ -29,3 +29,7 @@ export const generateReport=date=>request('report',{date});
 export const generateTestReport=date=>request('test_report',{date});
 export const generateIncidentPdf=id=>request('incident_pdf',{id});
 export const emailIncident=(id,recipient='')=>request('incident_mail',{id,recipient});
+export const generateOrderPdf=id=>request('order_pdf',{id});
+export const emailOrder=(id,recipient='')=>request('order_mail',{id,recipient});
+export const generateReportPdf=date=>request('report_pdf',{date});
+export const emailReport=(date,recipient='')=>request('report_mail',{date,recipient});
