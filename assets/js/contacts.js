@@ -1,6 +1,6 @@
 import {getContacts} from './api.js';
 
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const phone=s=>String(s||'').replace(/[^+\d]/g,'');
 const normalize=c=>({
   id:c.id||'',
