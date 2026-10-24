@@ -12,19 +12,27 @@ async function request(action,payload={}){
 }
 const rows=data=>data?.items||data?.events||data?.evidence||[];
 const value=(row,...names)=>{for(const name of names){if(row?.[name]!==undefined)return row[name]}return''};
+const hasField=(row,...names)=>names.some(name=>row&&Object.prototype.hasOwnProperty.call(row,name));
 const rowId=row=>String(value(row,'ID','id')||'');
 const norm=v=>String(v??'').trim();
 async function verifyEvent(event,shouldExist){
-  const data=await request('events',event?.fecha?{date:event.fecha}:{}),list=rows(data);
+  if(!event?.fecha)throw new Error('No se puede verificar Google sin la fecha original del registro.');
+  const data=await request('events',{date:event.fecha}),list=rows(data);
   if(!Array.isArray(list))throw new Error('Google no devolvió una lista verificable de registros.');
   const found=list.find(row=>rowId(row)===String(event.id));
   if(!shouldExist){if(found)throw new Error('Google sigue conservando el registro. No se ha borrado localmente.');return true}
   if(!found)throw new Error('Google no confirma el registro modificado. Se conserva la copia local anterior.');
   const checks=[['tipo','Tipo'],['zona','Zona'],['estado','Estado'],['observacion','Observación','Observacion'],['referencia','Referencia'],['cantidad','Cantidad'],['unidad','Unidad'],['prioridad','Prioridad']];
-  for(const names of checks){const expected=event[names[0]];if(expected===undefined||expected===null)continue;const actual=value(found,...names);if(norm(actual)!==norm(expected))throw new Error(`Google no confirma el cambio del campo ${names[0]}.`)}
+  for(const names of checks){const expected=event[names[0]];if(expected===undefined||expected===null)continue;const providerNames=names.slice(1);if(!hasField(found,...providerNames)&&!hasField(found,names[0]))continue;const actual=value(found,...providerNames,names[0]);if(norm(actual)!==norm(expected))throw new Error(`Google no confirma el cambio del campo ${names[0]}.`)}
   return true;
 }
-async function verifyEvidenceDeleted(id){const data=await request('evidence_list',{}),list=rows(data);if(!Array.isArray(list))throw new Error('Google no devolvió una lista verificable de evidencias.');if(list.some(row=>rowId(row)===String(id)))throw new Error('Google sigue conservando la evidencia. No se ha borrado localmente.');return true}
+async function verifyEvidenceDeleted(id,date){
+  if(!date)throw new Error('No se puede verificar Google sin la fecha original de la evidencia.');
+  const data=await request('evidence_list',{date}),list=rows(data);
+  if(!Array.isArray(list))throw new Error('Google no devolvió una lista verificable de evidencias.');
+  if(list.some(row=>rowId(row)===String(id)))throw new Error('Google sigue conservando la evidencia. No se ha borrado localmente.');
+  return true;
+}
 const reportPayload=(date,sections={})=>({date,sections:{work:sections.work!==false,incidents:sections.incidents!==false,orders:sections.orders===true,stock:sections.stock===true}});
 export const getSession=()=>request('session');
 export const getHistory=date=>request('history',{date});
@@ -37,9 +45,9 @@ export const updateContact=contact=>request('update_contact',contact);
 export const deactivateContact=id=>request('delete_contact',{id});
 export const createEvent=event=>request('event',event);
 export const updateEvent=async event=>{const result=await request('update_event',event);await verifyEvent(event,true);return result};
-export const deleteEvent=async(id,date='')=>{const result=await request('delete_event',{id});await verifyEvent({id,fecha:date},false);return result};
+export const deleteEvent=async(id,date)=>{const result=await request('delete_event',{id});await verifyEvent({id,fecha:date},false);return result};
 export const createEvidence=evidence=>request('evidence',evidence);
-export const deleteEvidence=async id=>{const result=await request('delete_evidence',{id});await verifyEvidenceDeleted(id);return result};
+export const deleteEvidence=async(id,date)=>{const result=await request('delete_evidence',{id});await verifyEvidenceDeleted(id,date);return result};
 export const createOrder=order=>request('order',order);
 export const generateReport=(date,sections)=>request('report',reportPayload(date,sections));
 export const generateTestReport=(date,sections)=>request('test_report',reportPayload(date,sections));
