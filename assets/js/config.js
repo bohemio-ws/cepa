@@ -1,5 +1,5 @@
 export const CONFIG = Object.freeze({
-  appName:'CEPA Altomira', city:'Tarancón', worker:'Helena Buitrago Vara', version:'3.3.0-TEST',
+  appName:'CEPA Altomira', city:'Tarancón', worker:'Helena Buitrago Vara', version:'3.3.1-TEST',
   testMode:true,
   testRecipient:'kennyclm@gmail.com',
   productionRecipient:'rbenavente@tarancon.es',
