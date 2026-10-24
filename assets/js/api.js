@@ -25,6 +25,7 @@ async function verifyEvent(event,shouldExist){
   return true;
 }
 async function verifyEvidenceDeleted(id){const data=await request('evidence_list',{}),list=rows(data);if(!Array.isArray(list))throw new Error('Google no devolvió una lista verificable de evidencias.');if(list.some(row=>rowId(row)===String(id)))throw new Error('Google sigue conservando la evidencia. No se ha borrado localmente.');return true}
+const reportPayload=(date,sections={})=>({date,sections:{work:sections.work!==false,incidents:sections.incidents!==false,orders:sections.orders===true,stock:sections.stock===true}});
 export const getSession=()=>request('session');
 export const getHistory=date=>request('history',{date});
 export const getEvents=date=>request('events',{date});
@@ -40,11 +41,11 @@ export const deleteEvent=async(id,date='')=>{const result=await request('delete_
 export const createEvidence=evidence=>request('evidence',evidence);
 export const deleteEvidence=async id=>{const result=await request('delete_evidence',{id});await verifyEvidenceDeleted(id);return result};
 export const createOrder=order=>request('order',order);
-export const generateReport=date=>request('report',{date});
-export const generateTestReport=date=>request('test_report',{date});
+export const generateReport=(date,sections)=>request('report',reportPayload(date,sections));
+export const generateTestReport=(date,sections)=>request('test_report',reportPayload(date,sections));
 export const generateIncidentPdf=id=>request('incident_pdf',{id});
 export const emailIncident=(id,recipient='')=>request('incident_mail',{id,recipient});
 export const generateOrderPdf=id=>request('order_pdf',{id});
 export const emailOrder=(id,recipient='')=>request('order_mail',{id,recipient});
-export const generateReportPdf=date=>request('report_pdf',{date});
-export const emailReport=(date,recipient='')=>request('report_mail',{date,recipient});
+export const generateReportPdf=(date,sections)=>request('report_pdf',reportPayload(date,sections));
+export const emailReport=(date,recipient='',sections)=>request('report_mail',{...reportPayload(date,sections),recipient});
