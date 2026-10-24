@@ -10,5 +10,5 @@ export const Store={
  update(n,id,changes){const all=read(n),i=all.findIndex(x=>x.id===id);if(i<0)return null;all[i]={...all[i],...changes,updatedAt:new Date().toISOString()};write(n,all);return all[i]},
  remove(n,id){const all=read(n),next=all.filter(x=>x.id!==id);if(next.length===all.length)return false;write(n,next);return true},
  replace:(n,all)=>write(n,all),
- snapshot(){return {reports:read('reports'),evidence:read('evidence'),incidents:read('incidents'),stock:read('stock'),orders:read('orders'),supplies:read('supplies')}}
+ snapshot(){return {reports:read('reports'),roomEvents:read('roomEvents'),dailyGeneral:read('dailyGeneral'),evidence:read('evidence'),incidents:read('incidents'),stock:read('stock'),orders:read('orders'),supplies:read('supplies')}}
 };
