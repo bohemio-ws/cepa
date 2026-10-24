@@ -13,7 +13,25 @@ async function shareText(title,text){if(navigator.share){await navigator.share({
 const incidentText=x=>`PARTE DE INCIDENCIA · CEPA Altomira\nZona: ${x.area||'-'}\nTipo: ${x.type||'-'}\nPrioridad: ${x.priority||'Normal'}\nEstado: ${x.status||'Abierta'}\nDescripción: ${x.description||'-'}`;
 const orderText=x=>`PEDIDO · CEPA Altomira\n${x.display||x.reference||''}\nProveedor: ${x.supplier||'-'}\n${x.items||''}\n${x.notes||''}`;
 const reportText=()=>`INFORME OPERATIVO · CEPA Altomira\n${document.querySelector('#reportPreview')?.innerText?.trim()||'Informe del día '+day()}`;
-async function changeIncident(id,mode){const x=Store.list('incidents').find(v=>v.id===id);if(!x)return;if(mode==='check'){const resolving=x.status!=='Resuelta',stamp=new Date().toISOString(),n={...x,status:resolving?'Resuelta':'Abierta',resolvedAt:resolving?stamp:null,reopenedAt:resolving?x.reopenedAt:stamp};await updateEvent(eventPayload(n));await createEvent(lifecyclePayload(n,resolving?'INCIDENCIA_RESUELTA':'INCIDENCIA_REABIERTA',n.status));Store.update('incidents',id,n)}else if(mode==='edit'){const area=prompt('Zona:',x.area);if(area===null)return;const type=prompt('Tipo:',x.type);if(type===null)return;const priority=prompt('Prioridad:',x.priority);if(priority===null)return;const description=prompt('Descripción:',x.description);if(description===null)return;const n={...x,area:area.trim(),type:type.trim(),priority:priority.trim(),description:description.trim()};await updateEvent(eventPayload(n));Store.update('incidents',id,n)}else if(mode==='delete'){if(!confirm('¿Eliminar esta incidencia también de Google?'))return;await deleteEvent(id,localDate(x.createdAt));for(const ev of Store.list('evidence').filter(e=>e.contextId===id)){await deleteEvidence(ev.id);Store.remove('evidence',ev.id)}Store.remove('incidents',id)}document.dispatchEvent(new CustomEvent('cepa:data-changed'))}
+async function changeIncident(id,mode){
+  const x=Store.list('incidents').find(v=>v.id===id);if(!x)return;
+  if(mode==='check'){
+    const resolving=x.status!=='Resuelta',stamp=new Date().toISOString(),n={...x,status:resolving?'Resuelta':'Abierta',resolvedAt:resolving?stamp:null,reopenedAt:resolving?x.reopenedAt:stamp};
+    await updateEvent(eventPayload(n));
+    try{await createEvent(lifecyclePayload(n,resolving?'INCIDENCIA_RESUELTA':'INCIDENCIA_REABIERTA',n.status))}
+    catch(e){try{await updateEvent(eventPayload(x))}catch{throw new Error('Google ha cambiado la incidencia pero no ha podido completar ni revertir el movimiento. No continúes con esta incidencia hasta revisar Google.')}throw e}
+    Store.update('incidents',id,n);
+  }else if(mode==='edit'){
+    const area=prompt('Zona:',x.area);if(area===null)return;const type=prompt('Tipo:',x.type);if(type===null)return;const priority=prompt('Prioridad:',x.priority);if(priority===null)return;const description=prompt('Descripción:',x.description);if(description===null)return;const n={...x,area:area.trim(),type:type.trim(),priority:priority.trim(),description:description.trim()};await updateEvent(eventPayload(n));Store.update('incidents',id,n);
+  }else if(mode==='delete'){
+    if(!confirm('¿Eliminar esta incidencia también de Google?'))return;
+    const photos=Store.list('evidence').filter(e=>e.contextId===id);
+    for(const ev of photos){await deleteEvidence(ev.id,localDate(ev.createdAt));Store.remove('evidence',ev.id)}
+    await deleteEvent(id,localDate(x.createdAt));
+    Store.remove('incidents',id);
+  }
+  document.dispatchEvent(new CustomEvent('cepa:data-changed'));
+}
 async function orderPdf(){return generateOrderPdf(order().id)}
 async function reportPdf(){return generateReportPdf(day(),reportSections())}
 document.querySelector('#printOrder')?.addEventListener('click',async()=>{try{openPdf(await orderPdf())}catch(e){fail(e)}});
