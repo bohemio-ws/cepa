@@ -15,15 +15,17 @@ const value=(row,...names)=>{for(const name of names){if(row?.[name]!==undefined
 const hasField=(row,...names)=>names.some(name=>row&&Object.prototype.hasOwnProperty.call(row,name));
 const rowId=row=>String(value(row,'ID','id')||'');
 const norm=v=>String(v??'').trim();
+const canonicalEvent=e=>({id:e.id,date:e.date??e.fecha,time:e.time??e.hora,type:e.type??e.tipo,zone:e.zone??e.zona,status:e.status??e.estado,observation:e.observation??e.observacion,reference:e.reference??e.referencia,quantity:e.quantity??e.cantidad,unit:e.unit??e.unidad,priority:e.priority??e.prioridad,origin:e.origin??e.origen});
 async function verifyEvent(event,shouldExist){
-  if(!event?.fecha)throw new Error('No se puede verificar Google sin la fecha original del registro.');
-  const data=await request('events',{date:event.fecha}),list=rows(data);
+  const e=canonicalEvent(event);
+  if(!e.date)throw new Error('No se puede verificar Google sin la fecha original del registro.');
+  const data=await request('events',{date:e.date}),list=rows(data);
   if(!Array.isArray(list))throw new Error('Google no devolvió una lista verificable de registros.');
-  const found=list.find(row=>rowId(row)===String(event.id));
+  const found=list.find(row=>rowId(row)===String(e.id));
   if(!shouldExist){if(found)throw new Error('Google sigue conservando el registro. No se ha borrado localmente.');return true}
   if(!found)throw new Error('Google no confirma el registro modificado. Se conserva la copia local anterior.');
-  const checks=[['tipo','Tipo'],['zona','Zona'],['estado','Estado'],['observacion','Observación','Observacion'],['referencia','Referencia'],['cantidad','Cantidad'],['unidad','Unidad'],['prioridad','Prioridad']];
-  for(const names of checks){const expected=event[names[0]];if(expected===undefined||expected===null)continue;const providerNames=names.slice(1);if(!hasField(found,...providerNames)&&!hasField(found,names[0]))continue;const actual=value(found,...providerNames,names[0]);if(norm(actual)!==norm(expected))throw new Error(`Google no confirma el cambio del campo ${names[0]}.`)}
+  const checks=[['type','Tipo'],['zone','Zona'],['status','Estado'],['observation','Observación','Observacion'],['reference','Referencia'],['quantity','Cantidad'],['unit','Unidad']];
+  for(const names of checks){const expected=e[names[0]];if(expected===undefined||expected===null)continue;const providerNames=names.slice(1);if(!hasField(found,...providerNames)&&!hasField(found,names[0]))continue;const actual=value(found,...providerNames,names[0]);if(norm(actual)!==norm(expected))throw new Error(`Google no confirma el cambio del campo ${names[0]}.`)}
   return true;
 }
 async function verifyEvidenceDeleted(id,date){
@@ -44,8 +46,8 @@ export const createContact=contact=>request('contact',contact);
 export const updateContact=contact=>request('update_contact',contact);
 export const deactivateContact=id=>request('delete_contact',{id});
 export const createEvent=event=>request('event',event);
-export const updateEvent=async event=>{const result=await request('update_event',event);await verifyEvent(event,true);return result};
-export const deleteEvent=async(id,date)=>{const result=await request('delete_event',{id});await verifyEvent({id,fecha:date},false);return result};
+export const updateEvent=async event=>{const e=canonicalEvent(event);const result=await request('update_event',e);await verifyEvent(e,true);return result};
+export const deleteEvent=async(id,date)=>{const result=await request('delete_event',{id});await verifyEvent({id,date},false);return result};
 export const createEvidence=evidence=>request('evidence',evidence);
 export const deleteEvidence=async(id,date)=>{const result=await request('delete_evidence',{id});await verifyEvidenceDeleted(id,date);return result};
 export const createOrder=order=>request('order',order);
