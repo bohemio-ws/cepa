@@ -26,7 +26,7 @@ async function verifyEvent(event,shouldExist){
   const found=list.find(row=>rowId(row)===String(e.id));
   if(!shouldExist){if(found)throw new Error('Google sigue conservando el registro. No se ha borrado localmente.');return true}
   if(!found)throw new Error('Google no confirma el registro modificado. Se conserva la copia local anterior.');
-  const checks=[['type','Tipo'],['zone','Zona'],['status','Estado'],['observation','Observación','Observacion'],['reference','Referencia'],['quantity','Cantidad'],['unit','Unidad']];
+  const checks=[['type','Tipo'],['zone','Zona'],['status','Estado'],['observation','Observación','Observacion'],['reference','Referencia'],['quantity','Cantidad'],['unit','Unidad'],['priority','Prioridad']];
   for(const names of checks){const expected=e[names[0]];if(expected===undefined||expected===null)continue;const providerNames=names.slice(1);if(!hasField(found,...providerNames)&&!hasField(found,names[0]))continue;const actual=value(found,...providerNames,names[0]);if(norm(actual)!==norm(expected))throw new Error(`Google no confirma el cambio del campo ${names[0]}.`)}
   return true;
 }
