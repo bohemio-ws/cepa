@@ -15,7 +15,9 @@ const value=(row,...names)=>{for(const name of names){if(row?.[name]!==undefined
 const hasField=(row,...names)=>names.some(name=>row&&Object.prototype.hasOwnProperty.call(row,name));
 const rowId=row=>String(value(row,'ID','id')||'');
 const norm=v=>String(v??'').trim();
+const today=()=>{const d=new Date(),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),n=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${n}`};
 const canonicalEvent=e=>({id:e.id,date:e.date??e.fecha,time:e.time??e.hora,type:e.type??e.tipo,zone:e.zone??e.zona,status:e.status??e.estado,observation:e.observation??e.observacion,reference:e.reference??e.referencia,quantity:e.quantity??e.cantidad,unit:e.unit??e.unidad,priority:e.priority??e.prioridad,origin:e.origin??e.origen});
+const canonicalEvidence=e=>({id:e.id,date:e.date??e.fecha,time:e.time??e.hora,type:e.type??e.tipo,referenceId:e.referenceId??e.referenciaId,zone:e.zone??e.zona,description:e.description??e.descripcion,imageBase64:e.imageBase64??e.archivo,mimeType:e.mimeType||'image/jpeg',origin:e.origin??e.origen});
 async function verifyEvent(event,shouldExist){
   const e=canonicalEvent(event);
   if(!e.date)throw new Error('No se puede verificar Google sin la fecha original del registro.');
@@ -29,7 +31,6 @@ async function verifyEvent(event,shouldExist){
   return true;
 }
 async function verifyEvidenceDeleted(id,date){
-  if(!date)throw new Error('No se puede verificar Google sin la fecha original de la evidencia.');
   const data=await request('evidence_list',{date}),list=rows(data);
   if(!Array.isArray(list))throw new Error('Google no devolvió una lista verificable de evidencias.');
   if(list.some(row=>rowId(row)===String(id)))throw new Error('Google sigue conservando la evidencia. No se ha borrado localmente.');
@@ -47,9 +48,9 @@ export const updateContact=contact=>request('update_contact',contact);
 export const deactivateContact=id=>request('delete_contact',{id});
 export const createEvent=event=>request('event',event);
 export const updateEvent=async event=>{const e=canonicalEvent(event);const result=await request('update_event',e);await verifyEvent(e,true);return result};
-export const deleteEvent=async(id,date)=>{const result=await request('delete_event',{id});await verifyEvent({id,date},false);return result};
-export const createEvidence=evidence=>request('evidence',evidence);
-export const deleteEvidence=async(id,date)=>{const result=await request('delete_evidence',{id});await verifyEvidenceDeleted(id,date);return result};
+export const deleteEvent=async(id,date=today())=>{const result=await request('delete_event',{id});await verifyEvent({id,date},false);return result};
+export const createEvidence=evidence=>request('evidence',canonicalEvidence(evidence));
+export const deleteEvidence=async(id,date=today())=>{const result=await request('delete_evidence',{id});await verifyEvidenceDeleted(id,date);return result};
 export const createOrder=order=>request('order',order);
 export const generateReport=(date,sections)=>request('report',reportPayload(date,sections));
 export const generateTestReport=(date,sections)=>request('test_report',reportPayload(date,sections));
