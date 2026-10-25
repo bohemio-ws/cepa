@@ -4,12 +4,19 @@ export function pdfFile(data){
   return new File([bytes],data.filename,{type:'application/pdf'});
 }
 export async function sharePdf(data,title){
+  if(data?.pdfUrl){
+    window.open(data.pdfUrl,'_blank');
+    return false;
+  }
   const file=pdfFile(data);
-  if(navigator.canShare?.({files:[file]})&&navigator.share){await navigator.share({title,files:[file]});return true}
-  if(data.pdfUrl){window.open(data.pdfUrl,'_blank');return false}
-  throw new Error('Este dispositivo no permite compartir el PDF.');
+  const url=URL.createObjectURL(file);
+  window.open(url,'_blank');
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+  return false;
 }
 export function openPdf(data){
-  if(!data?.pdfUrl)throw new Error('El backend no ha devuelto la dirección del PDF.');
-  window.open(data.pdfUrl,'_blank');
+  if(data?.pdfUrl){window.open(data.pdfUrl,'_blank');return}
+  const file=pdfFile(data),url=URL.createObjectURL(file);
+  window.open(url,'_blank');
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
 }
