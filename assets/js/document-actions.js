@@ -4,7 +4,7 @@ import {sharePdf,openPdf} from './documents.js';
 const localDate=value=>{const d=value?new Date(value):new Date();if(Number.isNaN(d.getTime()))return'';const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),n=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${n}`};
 const day=()=>localDate();
 const latestOrder=()=>Store.list('orders')[0]||null;
-const reportSections=()=>({work:document.querySelector('#reportWork')?.checked!==false,incidents:document.querySelector('#reportIncidents')?.checked!==false,orders:document.querySelector('#reportOrders')?.checked===true,stock:document.querySelector('#reportStock')?.checked===true});
+const reportSections=()=>{const date=day(),s=Store.snapshot(),has=x=>(x||[]).some(v=>localDate(v.createdAt)===date);return{work:true,incidents:true,orders:has(s.orders)||has(s.supplies),stock:false}};
 const eventPayload=x=>{const d=new Date(x.createdAt);return{id:x.id,fecha:localDate(d),hora:Number.isNaN(d.getTime())?'':d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}),tipo:'INCIDENCIA',zona:x.area,estado:x.status,observacion:x.description,referencia:x.type,cantidad:'',unidad:'',prioridad:x.priority||'Normal',origen:'CEPA_APP'}};
 const lifecyclePayload=(x,tipo,estado)=>{const d=new Date();return{id:uid(tipo==='INCIDENCIA_RESUELTA'?'RES':'REA'),fecha:localDate(d),hora:d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}),tipo,zona:x.area,estado,observacion:x.description,referencia:x.id,cantidad:'',unidad:'',prioridad:x.priority||'Normal',origen:'CEPA_APP'}};
 function order(){const x=latestOrder();if(!x)throw new Error('Primero crea un pedido.');return x}
