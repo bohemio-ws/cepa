@@ -4,11 +4,12 @@ export function pdfFile(data){
   return new File([bytes],data.filename,{type:'application/pdf'});
 }
 export async function sharePdf(data,title){
-  if(data?.pdfUrl){
-    window.open(data.pdfUrl,'_blank');
-    return false;
-  }
   const file=pdfFile(data);
+  if(navigator.share&&navigator.canShare?.({files:[file]})){
+    await navigator.share({title,files:[file]});
+    return true;
+  }
+  if(data?.pdfUrl){window.open(data.pdfUrl,'_blank');return false}
   const url=URL.createObjectURL(file);
   window.open(url,'_blank');
   setTimeout(()=>URL.revokeObjectURL(url),60000);
