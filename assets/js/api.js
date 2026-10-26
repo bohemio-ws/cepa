@@ -23,9 +23,11 @@ async function verifyEvent(event,shouldExist){
   if(!e.date)throw new Error('No se puede verificar Google sin la fecha original del registro.');
   const data=await request('events',{date:e.date}),list=rows(data);
   if(!Array.isArray(list))throw new Error('Google no devolvió una lista verificable de registros.');
-  const found=list.find(row=>rowId(row)===String(e.id));
-  if(!shouldExist){if(found)throw new Error('Google sigue conservando el registro. No se ha borrado localmente.');return true}
-  if(!found)throw new Error('Google no confirma el registro modificado. Se conserva la copia local anterior.');
+  const matches=list.filter(row=>rowId(row)===String(e.id));
+  if(!shouldExist){if(matches.length)throw new Error('Google sigue conservando el registro. No se ha borrado localmente.');return true}
+  if(!matches.length)throw new Error('Google no confirma el registro. Se conserva la copia local anterior.');
+  if(matches.length>1)throw new Error(`Google contiene ${matches.length} copias del mismo registro ${e.id}. Revisa el histórico antes de continuar.`);
+  const found=matches[0];
   const checks=[['type','Tipo'],['zone','Zona'],['status','Estado'],['observation','Observación','Observacion'],['reference','Referencia'],['quantity','Cantidad'],['unit','Unidad'],['priority','Prioridad']];
   for(const names of checks){const expected=e[names[0]];if(expected===undefined||expected===null)continue;const providerNames=names.slice(1);if(!hasField(found,...providerNames)&&!hasField(found,names[0]))continue;const actual=value(found,...providerNames,names[0]);if(norm(actual)!==norm(expected))throw new Error(`Google no confirma el cambio del campo ${names[0]}.`)}
   return true;
@@ -36,7 +38,7 @@ async function verifyEvidenceDeleted(id,date){
   if(list.some(row=>rowId(row)===String(id)))throw new Error('Google sigue conservando la evidencia. No se ha borrado localmente.');
   return true;
 }
-const reportPayload=(date,sections={})=>({date,sections:{work:sections.work!==false,incidents:sections.incidents!==false,orders:sections.orders===true,stock:sections.stock===true}});
+const reportPayload=(date,sections={})=>({date,sections:{work:true,incidents:sections.incidents===true,orders:sections.orders===true,stock:false}});
 export const getSession=()=>request('session');
 export const getHistory=date=>request('history',{date});
 export const getEvents=date=>request('events',{date});
@@ -46,7 +48,7 @@ export const getContacts=()=>request('contacts');
 export const createContact=contact=>request('contact',contact);
 export const updateContact=contact=>request('update_contact',contact);
 export const deactivateContact=id=>request('delete_contact',{id});
-export const createEvent=event=>request('event',event);
+export const createEvent=async event=>{const e=canonicalEvent(event);if(!e.id||!e.date)throw new Error('Registro incompleto: falta ID o fecha.');const before=rows(await request('events',{date:e.date}));const existing=before.filter(row=>rowId(row)===String(e.id));if(existing.length>1)throw new Error(`Google ya contiene registros duplicados con ID ${e.id}.`);if(existing.length===1){await verifyEvent(e,true);return{ok:true,id:e.id,idempotent:true}}const result=await request('event',event);await verifyEvent(e,true);return result};
 export const updateEvent=async event=>{const e=canonicalEvent(event);const result=await request('update_event',e);await verifyEvent(e,true);return result};
 export const deleteEvent=async(id,date=today())=>{const result=await request('delete_event',{id});await verifyEvent({id,date},false);return result};
 export const createEvidence=evidence=>request('evidence',canonicalEvidence(evidence));
