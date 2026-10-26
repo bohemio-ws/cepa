@@ -1,7 +1,10 @@
 export const CONFIG = Object.freeze({
-  appName:'CEPA Altomira', city:'Tarancón', worker:'Helena Buitrago Vara', version:'3.3.2',
-  testMode:false,
-  testRecipient:'kennyclm@gmail.com',
+  appName:'CEPA Altomira', city:'Tarancón', worker:'Helena Buitrago Vara', version:'3.3.4',
+  environment:'production', testMode:false,
+  corporate:Object.freeze({
+    subtitle:'Control operativo municipal · Ayuntamiento de Tarancón',
+    footer:'Documento generado automáticamente por CEPA Altomira · Ayuntamiento de Tarancón'
+  }),
   productionRecipient:'rbenavente@tarancon.es',
   reportEndpoint:'https://script.google.com/macros/s/AKfycbxF0R-b3ARABEiaRa5eXNOcKt4FunzsOb_nTljRzKWH0Ipzj7CcNsHpR7VAP9i6fHAW/exec',
   oauthClientId:'172079845887-7uj01u2ptksn62l6cc8bjn1e0qi8akv7.apps.googleusercontent.com',
