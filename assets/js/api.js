@@ -54,12 +54,17 @@ export const deleteEvent=async(id,date=today())=>{const result=await request('de
 export const createEvidence=async evidence=>{
   const e=canonicalEvidence(evidence);
   if(!e.id||!e.date)throw new Error('Evidencia incompleta: falta ID o fecha.');
-  // Single request: never fetch the complete photo list before or after upload.
-  // The deployed backend is responsible for idempotency of the evidence ID.
+  const before=rows(await request('evidence_list',{date:e.date}));
+  const existing=before.filter(row=>rowId(row)===String(e.id));
+  if(existing.length>1)throw new Error('Google contiene evidencias duplicadas con el mismo ID. Revisa el histórico.');
+  if(existing.length===1){const found=existing[0];return{ok:true,id:e.id,idempotent:true,fileUrl:value(found,'URL','Url','url','fileUrl','Archivo_URL','archivoUrl')}}
   const result=await request('evidence',e);
-  const url=result.fileUrl||result.url||result.archivoUrl||'';
-  if(!url)throw new Error('No se confirmó el enlace de la foto. Consulta Drive antes de repetir.');
-  return {...result,fileUrl:url};
+  const after=rows(await request('evidence_list',{date:e.date}));
+  const matches=after.filter(row=>rowId(row)===String(e.id));
+  if(matches.length!==1)throw new Error('Google no confirma una única evidencia. Comprueba el histórico antes de repetir la subida.');
+  const url=result.fileUrl||result.url||result.archivoUrl||value(matches[0],'URL','Url','url','fileUrl','Archivo_URL','archivoUrl');
+  if(!url)throw new Error('La evidencia figura en Google, pero no se ha confirmado su enlace. Consulta el histórico antes de repetir.');
+  return{...result,fileUrl:url};
 };
 export const deleteEvidence=async(id,date=today())=>{const result=await request('delete_evidence',{id});await verifyEvidenceDeleted(id,date);return result};
 export const createOrder=order=>request('order',order);
