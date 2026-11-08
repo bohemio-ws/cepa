@@ -11,6 +11,9 @@ async function request(action,payload={}){
   return data;
 }
 const rows=data=>data?.items||data?.events||data?.evidence||[];
+// El backend antiguo devuelve imágenes Base64 en evidence_list.
+// Para verificar guardados solo necesitamos los metadatos.
+const evidenceMetadata=rows=>rows.map(row=>{const copy={...row};for(const key of ['Archivo_URL','archivoUrl','url','fileUrl'])if(typeof copy[key]==='string'&&copy[key].startsWith('data:'))copy[key]='';return copy;});
 const value=(row,...names)=>{for(const name of names){if(row?.[name]!==undefined)return row[name]}return''};
 const hasField=(row,...names)=>names.some(name=>row&&Object.prototype.hasOwnProperty.call(row,name));
 const rowId=row=>String(value(row,'ID','id')||'');
@@ -54,12 +57,12 @@ export const deleteEvent=async(id,date=today())=>{const result=await request('de
 export const createEvidence=async evidence=>{
   const e=canonicalEvidence(evidence);
   if(!e.id||!e.date)throw new Error('Evidencia incompleta: falta ID o fecha.');
-  const before=rows(await request('evidence_list',{date:e.date}));
+  const before=evidenceMetadata(rows(await request('evidence_list',{date:e.date})));
   const existing=before.filter(row=>rowId(row)===String(e.id));
   if(existing.length>1)throw new Error('Google contiene evidencias duplicadas con el mismo ID. Revisa el histórico.');
   if(existing.length===1){const found=existing[0];return{ok:true,id:e.id,idempotent:true,fileUrl:value(found,'URL','Url','url','fileUrl','Archivo_URL','archivoUrl')}}
   const result=await request('evidence',e);
-  const after=rows(await request('evidence_list',{date:e.date}));
+  const after=evidenceMetadata(rows(await request('evidence_list',{date:e.date})));
   const matches=after.filter(row=>rowId(row)===String(e.id));
   if(matches.length!==1)throw new Error('Google no confirma una única evidencia. Comprueba el histórico antes de repetir la subida.');
   const url=result.fileUrl||result.url||result.archivoUrl||value(matches[0],'URL','Url','url','fileUrl','Archivo_URL','archivoUrl');
