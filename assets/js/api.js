@@ -46,6 +46,7 @@ export const getSession=()=>request('session');
 export const getHistory=date=>request('history',{date});
 export const getEvents=date=>request('events',{date});
 export const getEvidence=date=>request('evidence_list',{date});
+export const getEvidenceImage=(id,date)=>request('evidence_image',{id,date});
 export const getNextOrder=date=>request('nextorder',{date});
 export const getContacts=()=>request('contacts');
 export const createContact=contact=>request('contact',contact);
