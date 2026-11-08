@@ -10,17 +10,13 @@ const read=(n,fallback=[])=>{
     const raw=localStorage.getItem(key(n));
     if(raw===null)return fallback;
     const parsed=JSON.parse(raw);
-    if(!Array.isArray(parsed))return fallback;
-    const safe=diskValue(n,parsed);
-    memory.set(n,safe);
-    return safe;
+    return Array.isArray(parsed)?parsed:fallback;
   }catch(error){console.warn('CEPA: no se puede leer la caché local.',{bucket:n,error});return fallback}
 };
 const diskValue=(n,v)=>n==='evidence'?v.map(item=>({...item,url:typeof item.url==='string'&&item.url.startsWith('data:')?'':item.url})):v;
 const write=(n,v)=>{
-  const safe=diskValue(n,v);
-  memory.set(n,safe);
-  try{localStorage.setItem(key(n),JSON.stringify(safe));return true}
+  memory.set(n,v);
+  try{localStorage.setItem(key(n),JSON.stringify(diskValue(n,v)));return true}
   catch(error){
     console.warn('CEPA: caché persistente no disponible; datos de la sesión conservados en memoria.',{bucket:n,error});
     try{window.dispatchEvent(new CustomEvent('cepa:cache-write-failed',{detail:{bucket:n,reason:error?.name||'UNKNOWN'}}))}catch{}
