@@ -13,10 +13,46 @@ async function shareText(title,text){if(navigator.share){await navigator.share({
 function show(id){$$('.view').forEach(v=>v.classList.remove('active'));$(`#view-${id}`)?.classList.add('active');scrollTo(0,0);if(id==='trabajo')renderRoomHistory();if(id==='informes')renderReport();if(id==='historico')renderHistory()}
 function modules(){$('#moduleGrid').innerHTML=CONFIG.modules.map(m=>`<button class="module" data-open="${m.id}"><span class="icon">${m.icon}</span><strong>${m.title}</strong><small>${m.subtitle}</small></button>`).join('');$$('[data-open]').forEach(b=>b.onclick=()=>show(b.dataset.open))}
 function rooms(){$('#rooms').innerHTML=CONFIG.rooms.map(([id,name])=>`<div class="room"><input type="checkbox" id="r-${id}" data-room="${id}"><label for="r-${id}"><strong>${name}</strong></label><input data-obs="${id}" placeholder="Observación opcional"><div class="photo-actions"><label class="photo-btn">📷 Hacer foto<input data-room-camera="${id}" type="file" accept="image/*" capture="environment"></label><label class="photo-btn">🖼️ Elegir archivo<input data-room-photo="${id}" type="file" accept="image/*"></label></div><button type="button" class="btn primary" data-save-room="${id}">Guardar ${name}</button><div class="room-log" data-room-log="${id}"></div></div>`).join('');$$('[data-save-room]').forEach(b=>b.onclick=()=>saveRoom(b.dataset.saveRoom));renderRoomHistory()}
-function compressPhoto(file){return new Promise((resolve,reject)=>{const img=new Image,r=new FileReader;r.onerror=reject;r.onload=()=>{img.onload=()=>{const max=1600,k=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',.78))};img.onerror=reject;img.src=r.result};r.readAsDataURL(file)})}
-async function addPhoto(file,contextType,contextId,area,notes=''){if(!file||!file.size)return null;const imageBase64=await compressPhoto(file),id=uid('FOTO'),createdAt=now();const r=await createEvidence({id,fecha:localDay(createdAt),hora:new Date(createdAt).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}),tipo:contextType,referenciaId:contextId,zona:area,descripcion:notes,archivo:imageBase64,nombre:file.name,origen:'CEPA_APP'});const url=r.fileUrl||r.url||r.archivoUrl||'';if(!url)throw new Error('Google no ha confirmado el enlace de la fotografía. Comprueba la carpeta de Drive antes de repetir la subida para evitar duplicados.');const x={id,createdAt,contextType,contextId,area,notes,name:file.name,type:'image/jpeg',url};Store.add('evidence',x);return x}
+function compressPhoto(file){
+  return new Promise((resolve,reject)=>{
+    if(!file||!file.size){reject(new Error('Selecciona una fotografía válida.'));return;}
+    let url;
+    try{url=URL.createObjectURL(file)}catch(e){reject(new Error('No se puede abrir la fotografía.'));return;}
+    const img=new Image();
+    const release=()=>{if(url){URL.revokeObjectURL(url);url=null;}img.onload=null;img.onerror=null;};
+    img.onerror=()=>{release();reject(new Error('No se pudo leer la fotografía.'))};
+    img.onload=()=>{
+      let canvas;
+      try{
+        const w=img.naturalWidth,h=img.naturalHeight;
+        if(!w||!h)throw new Error('Fotografía sin dimensiones válidas.');
+        const factor=Math.min(1,800/Math.max(w,h));
+        canvas=document.createElement('canvas');
+        canvas.width=Math.max(1,Math.round(w*factor));
+        canvas.height=Math.max(1,Math.round(h*factor));
+        const context=canvas.getContext('2d',{alpha:false});
+        if(!context)throw new Error('No hay memoria para preparar la imagen.');
+        context.drawImage(img,0,0,canvas.width,canvas.height);
+        release();
+        canvas.toBlob(blob=>{
+          canvas.width=0;canvas.height=0;
+          if(!blob){reject(new Error('No se pudo comprimir la fotografía.'));return;}
+          if(blob.size>800000){reject(new Error('La fotografía supera el tamaño admitido. Elige una imagen más pequeña.'));return;}
+          const reader=new FileReader();
+          reader.onerror=()=>reject(new Error('No se pudo preparar la fotografía para Google.'));
+          reader.onload=()=>resolve(reader.result);
+          reader.readAsDataURL(blob);
+        },'image/jpeg',0.65);
+      }catch(error){release();if(canvas){canvas.width=0;canvas.height=0;}reject(error)}
+    };
+    img.src=url;
+  });
+}
+const pendingPhotoIds=new WeakMap();
+async function addPhoto(file,contextType,contextId,area,notes=''){if(!file||!file.size)return null;let upload=pendingPhotoIds.get(file);if(!upload){upload={id:uid('FOTO'),createdAt:now()};pendingPhotoIds.set(file,upload)}const {id,createdAt}=upload;const imageBase64=await compressPhoto(file);const r=await createEvidence({id,fecha:localDay(createdAt),hora:new Date(createdAt).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}),tipo:contextType,referenciaId:contextId,zona:area,descripcion:notes,archivo:imageBase64,nombre:file.name,origen:'CEPA_APP'});const url=r.fileUrl||r.url||r.archivoUrl||'';if(!url)throw new Error('Google no ha confirmado el enlace de la fotografía. Comprueba la carpeta de Drive antes de repetir la subida para evitar duplicados.');const x={id,createdAt,contextType,contextId,area,notes,name:file.name,type:'image/jpeg',url};Store.add('evidence',x);pendingPhotoIds.delete(file);return x}
 const todayRooms=()=>Store.list('roomEvents').filter(x=>localDay(x.createdAt)===localDay(new Date()));
-async function saveRoom(id){const cfg=CONFIG.rooms.find(x=>x[0]===id);if(!cfg)return;const[,name,legacyId]=cfg,check=$(`[data-room="${id}"]`),obs=$(`[data-obs="${id}"]`),cam=$(`[data-room-camera="${id}"]`),gal=$(`[data-room-photo="${id}"]`),msg=$('#dailyMsg');const x={id:uid('REG'),createdAt:now(),roomId:id,legacyId,name,done:check.checked,obs:obs.value.trim(),status:$('#dailyStatus').value};try{await persist('roomEvents',x,payload(x,'TRABAJO_DIARIO',name,x.status,x.obs,legacyId))}catch(e){msg.textContent=`No guardado en Google: ${e.message||'error de conexión'}`;return}const file=cam.files?.[0]||gal.files?.[0];if(file){try{await addPhoto(file,'roomEvent',x.id,name,x.obs)}catch(e){renderRoomHistory();renderReport();msg.textContent=`${name}: registro guardado en Google, pero la fotografía NO se ha guardado: ${e.message||'error de subida'}. Conserva la imagen y vuelve a adjuntarla desde Evidencias.`;return}}check.checked=false;obs.value='';cam.value='';gal.value='';renderRoomHistory();renderReport();msg.textContent=`${name}: registro guardado y sincronizado con Google.`}
+const pendingRoomPhoto=new Map();
+async function saveRoom(id){const cfg=CONFIG.rooms.find(x=>x[0]===id);if(!cfg)return;const[,name,legacyId]=cfg,check=$(`[data-room="${id}"]`),obs=$(`[data-obs="${id}"]`),cam=$(`[data-room-camera="${id}"]`),gal=$(`[data-room-photo="${id}"]`),msg=$('#dailyMsg');const x={id:uid('REG'),createdAt:now(),roomId:id,legacyId,name,done:check.checked,obs:obs.value.trim(),status:$('#dailyStatus').value};const pending=pendingRoomPhoto.get(id);const record=pending||x;if(!pending){try{await persist('roomEvents',x,payload(x,'TRABAJO_DIARIO',name,x.status,x.obs,legacyId))}catch(e){msg.textContent=`No guardado en Google: ${e.message||'error de conexión'}`;return}}const file=cam.files?.[0]||gal.files?.[0];if(pending&&!file){msg.textContent=`${name}: el registro ya está guardado. Selecciona una fotografía para completar la evidencia, sin crear otro registro.`;return}if(file){try{await addPhoto(file,'roomEvent',record.id,name,record.obs)}catch(e){pendingRoomPhoto.set(id,record);renderRoomHistory();renderReport();msg.textContent=`${name}: registro guardado, pero NO la fotografía: ${e.message||'error de subida'}. Mantén la foto seleccionada y pulsa Guardar otra vez para reintentar solo la imagen, sin duplicar el registro.`;return}}pendingRoomPhoto.delete(id);check.checked=false;obs.value='';cam.value='';gal.value='';renderRoomHistory();renderReport();msg.textContent=`${name}: registro guardado y sincronizado con Google.`}
 function renderRoomHistory(){for(const[id]of CONFIG.rooms){const list=todayRooms().filter(x=>x.roomId===id),box=$(`[data-room-log="${id}"]`);if(box)box.innerHTML=list.length?`<small><b>${list.length} registro${list.length>1?'s':''} hoy</b></small>`:''}}
 async function saveGeneral(){const x={id:uid('GENERAL'),createdAt:now(),status:$('#dailyStatus').value,notes:$('#dailyNotes').value.trim()};try{await persist('dailyGeneral',x,payload(x,'OBSERVACION_GENERAL','CEPA Altomira',x.status,x.notes));$('#dailyMsg').textContent='Observaciones guardadas y sincronizadas.'}catch(e){$('#dailyMsg').textContent=e.message}}
 async function saveIncident(e){e.preventDefault();const f=new FormData(e.target),x={id:uid('INC'),createdAt:now(),status:'Abierta',area:f.get('area').trim(),type:f.get('type'),priority:f.get('priority'),description:f.get('description').trim()};try{await persist('incidents',x,payload(x,'INCIDENCIA',x.area,x.status,x.description,x.type,'','',x.priority));await addPhoto(chosenPhoto(f),'incident',x.id,x.area,x.description);e.target.reset();renderLists();renderReport()}catch(err){alert(err.message)}}
