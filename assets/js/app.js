@@ -12,8 +12,44 @@ async function persist(bucket,x,p){await createEvent(p);Store.add(bucket,x);retu
 async function shareText(title,text){if(navigator.share){await navigator.share({title,text});return}window.open(`https://wa.me/?text=${encodeURIComponent(`${title}\n\n${text}`)}`,'_blank')}
 function show(id){$$('.view').forEach(v=>v.classList.remove('active'));$(`#view-${id}`)?.classList.add('active');scrollTo(0,0);if(id==='trabajo')renderRoomHistory();if(id==='informes')renderReport();if(id==='historico')renderHistory()}
 function modules(){$('#moduleGrid').innerHTML=CONFIG.modules.map(m=>`<button class="module" data-open="${m.id}"><span class="icon">${m.icon}</span><strong>${m.title}</strong><small>${m.subtitle}</small></button>`).join('');$$('[data-open]').forEach(b=>b.onclick=()=>show(b.dataset.open))}
-function rooms(){$('#rooms').innerHTML=CONFIG.rooms.map(([id,name])=>`<div class="room"><input type="checkbox" id="r-${id}" data-room="${id}"><label for="r-${id}"><strong>${name}</strong></label><input data-obs="${id}" placeholder="Observación opcional"><div class="photo-actions"><label class="photo-btn">📷 Hacer foto<input data-room-camera="${id}" type="file" accept="image/*" capture="environment"></label><label class="photo-btn">🖼️ Elegir archivo<input data-room-photo="${id}" type="file" accept="image/*"></label></div><button type="button" class="btn primary" data-save-room="${id}">Guardar ${name}</button><div class="room-log" data-room-log="${id}"></div></div>`).join('');$$('[data-save-room]').forEach(b=>b.onclick=()=>saveRoom(b.dataset.saveRoom));renderRoomHistory()}
-function compressPhoto(file){return new Promise((resolve,reject)=>{const img=new Image,r=new FileReader;r.onerror=reject;r.onload=()=>{img.onload=()=>{const max=1600,k=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',.78))};img.onerror=reject;img.src=r.result};r.readAsDataURL(file)})}
+function rooms(){$('#rooms').innerHTML=CONFIG.rooms.map(([id,name])=>`<div class="room"><input type="checkbox" id="r-${id}" data-room="${id}"><label for="r-${id}"><strong>${name}</strong></label><input data-obs="${id}" placeholder="Observación opcional"><div class="photo-actions"><label class="photo-btn">📷 Hacer foto<input data-room-camera="${id}" type="file" accept="image/*" capture="environment"></label><label class="photo-btn">🖼️ Elegir archivo<input data-room-photo="${id}" type="file" accept="image/*"></label></div><button type="button" class="btn primary" data-save-room="${id}">Guardar ${name}</button><div class="room-log" data-room-log="${id}"></div></div>`).join('');$('[data-save-room]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;b.disabled=true;try{await saveRoom(b.dataset.saveRoom)}finally{b.disabled=false}});renderRoomHistory()}
+function compressPhoto(file){
+  // Never decode a full-resolution camera photo into a Base64 string.
+  // Blob URL -> scaled canvas -> compressed Blob -> small data URL.
+  return new Promise((resolve,reject)=>{
+    if(!file||!file.size)return reject(new Error('La fotografía está vacía.'));
+    let objectUrl;try{objectUrl=URL.createObjectURL(file)}catch{return reject(new Error('El navegador no puede abrir la fotografía.'))}const img=new Image();
+    let canvas=null,finished=false;
+    const cleanup=()=>{URL.revokeObjectURL(objectUrl);img.onload=null;img.onerror=null;if(canvas){canvas.width=0;canvas.height=0;canvas=null;}img.src='';};
+    const fail=error=>{if(finished)return;finished=true;cleanup();reject(error instanceof Error?error:new Error('No se pudo procesar la fotografía.'))};
+    img.onerror=()=>fail(new Error('No se puede leer esta fotografía. Prueba con una imagen JPEG.'));
+    img.onload=()=>{
+      try{
+        const w=img.naturalWidth,h=img.naturalHeight;
+        if(!w||!h)throw new Error('La fotografía no tiene dimensiones válidas.');
+        // Keep the decoded/canvas bitmap small on low-memory Android devices.
+        const scale=Math.min(1,960/Math.max(w,h));
+        canvas=document.createElement('canvas');
+        canvas.width=Math.max(1,Math.round(w*scale));
+        canvas.height=Math.max(1,Math.round(h*scale));
+        const ctx=canvas.getContext('2d',{alpha:false});
+        if(!ctx)throw new Error('El navegador no puede procesar imágenes.');
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        // Release the original image before creating the transfer string.
+        URL.revokeObjectURL(objectUrl);img.onload=null;img.onerror=null;img.src='';
+        canvas.toBlob(blob=>{
+          if(!blob){fail(new Error('No se pudo comprimir la fotografía.'));return;}
+          if(blob.size>650000){fail(new Error('La imagen comprimida sigue siendo demasiado grande. Utiliza una foto de menor resolución.'));return;}
+          const reader=new FileReader();
+          reader.onerror=()=>fail(new Error('No se pudo preparar la fotografía.'));
+          reader.onload=()=>{if(finished)return;finished=true;const data=reader.result;cleanup();resolve(data)};
+          reader.readAsDataURL(blob);
+        },'image/jpeg',0.62);
+      }catch(error){fail(error)}
+    };
+    img.src=objectUrl;
+  });
+}
 async function addPhoto(file,contextType,contextId,area,notes=''){if(!file||!file.size)return null;const imageBase64=await compressPhoto(file),id=uid('FOTO'),createdAt=now();const r=await createEvidence({id,fecha:localDay(createdAt),hora:new Date(createdAt).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}),tipo:contextType,referenciaId:contextId,zona:area,descripcion:notes,archivo:imageBase64,nombre:file.name,origen:'CEPA_APP'});const url=r.fileUrl||r.url||r.archivoUrl||'';if(!url)throw new Error('Google no ha confirmado el enlace de la fotografía. Comprueba la carpeta de Drive antes de repetir la subida para evitar duplicados.');const x={id,createdAt,contextType,contextId,area,notes,name:file.name,type:'image/jpeg',url};Store.add('evidence',x);return x}
 const todayRooms=()=>Store.list('roomEvents').filter(x=>localDay(x.createdAt)===localDay(new Date()));
 async function saveRoom(id){const cfg=CONFIG.rooms.find(x=>x[0]===id);if(!cfg)return;const[,name,legacyId]=cfg,check=$(`[data-room="${id}"]`),obs=$(`[data-obs="${id}"]`),cam=$(`[data-room-camera="${id}"]`),gal=$(`[data-room-photo="${id}"]`),msg=$('#dailyMsg');const x={id:uid('REG'),createdAt:now(),roomId:id,legacyId,name,done:check.checked,obs:obs.value.trim(),status:$('#dailyStatus').value};try{await persist('roomEvents',x,payload(x,'TRABAJO_DIARIO',name,x.status,x.obs,legacyId))}catch(e){msg.textContent=`No guardado en Google: ${e.message||'error de conexión'}`;return}const file=cam.files?.[0]||gal.files?.[0];if(file){try{await addPhoto(file,'roomEvent',x.id,name,x.obs)}catch(e){renderRoomHistory();renderReport();msg.textContent=`${name}: registro guardado en Google, pero la fotografía NO se ha guardado: ${e.message||'error de subida'}. Conserva la imagen y vuelve a adjuntarla desde Evidencias.`;return}}check.checked=false;obs.value='';cam.value='';gal.value='';renderRoomHistory();renderReport();msg.textContent=`${name}: registro guardado y sincronizado con Google.`}
