@@ -1,5 +1,5 @@
 export const CONFIG = Object.freeze({
-  appName:'CEPA Altomira', city:'Tarancón', worker:'Helena Buitrago Vara', version:'3.3.4',
+  appName:'CEPA Altomira', city:'Tarancón', worker:'Helena Buitrago Vara', version:'3.3.5',
   environment:'production', testMode:false,
   corporate:Object.freeze({
     subtitle:'Control operativo municipal · Ayuntamiento de Tarancón',
