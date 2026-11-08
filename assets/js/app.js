@@ -68,7 +68,7 @@ function compressPhoto(file){
       try{
         const w=img.naturalWidth,h=img.naturalHeight;
         if(!w||!h)throw new Error('Fotografía sin dimensiones válidas.');
-        const factor=Math.min(1,800/Math.max(w,h));
+        const factor=Math.min(1,1280/Math.max(w,h));
         canvas=document.createElement('canvas');
         canvas.width=Math.max(1,Math.round(w*factor));
         canvas.height=Math.max(1,Math.round(h*factor));
@@ -79,12 +79,12 @@ function compressPhoto(file){
         canvas.toBlob(blob=>{
           canvas.width=0;canvas.height=0;
           if(!blob){reject(new Error('No se pudo comprimir la fotografía.'));return;}
-          if(blob.size>800000){reject(new Error('La fotografía supera el tamaño admitido. Elige una imagen más pequeña.'));return;}
+          if(blob.size>1500000){reject(new Error('La fotografía supera el tamaño admitido. Elige una imagen más pequeña.'));return;}
           const reader=new FileReader();
           reader.onerror=()=>reject(new Error('No se pudo preparar la fotografía para Google.'));
           reader.onload=()=>resolve(reader.result);
           reader.readAsDataURL(blob);
-        },'image/jpeg',0.65);
+        },'image/jpeg',0.75);
       }catch(error){release();if(canvas){canvas.width=0;canvas.height=0;}reject(error)}
     };
     img.src=url;
