@@ -17,13 +17,13 @@ async function captureInline(button){
   const close=()=>{if(finished)return;finished=true;stream?.getTracks().forEach(t=>t.stop());video.srcObject=null;overlay.remove()};
   overlay.querySelector('[data-camera-cancel]').onclick=close;
   try{
-    stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:960},height:{ideal:720}}});
+    stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:960}}});
     if(finished){stream.getTracks().forEach(t=>t.stop());return}
     video.srcObject=stream;await video.play();
   }catch(e){error.textContent='La cámara integrada no está disponible. Pulsa Cancelar y usa Elegir archivo.';stream?.getTracks().forEach(t=>t.stop());return}
   overlay.querySelector('[data-camera-shot]').onclick=()=>{
     if(!video.videoWidth||!video.videoHeight){error.textContent='Espera a que aparezca la imagen.';return}
-    const scale=Math.min(1,800/Math.max(video.videoWidth,video.videoHeight)),canvas=document.createElement('canvas');
+    const scale=Math.min(1,1280/Math.max(video.videoWidth,video.videoHeight)),canvas=document.createElement('canvas');
     canvas.width=Math.round(video.videoWidth*scale);canvas.height=Math.round(video.videoHeight*scale);
     canvas.getContext('2d',{alpha:false}).drawImage(video,0,0,canvas.width,canvas.height);
     canvas.toBlob(blob=>{
@@ -35,7 +35,7 @@ async function captureInline(button){
       close();
       const msg=room?document.getElementById('dailyMsg'):form?.querySelector('#evidenceMsg');
       if(msg)msg.textContent='Fotografía preparada. Pulsa Guardar para subirla.';
-    },'image/jpeg',0.65);
+    },'image/jpeg',0.75);
   };
 }
 function enableInlineCamera(){
