@@ -11,9 +11,6 @@ async function request(action,payload={}){
   return data;
 }
 const rows=data=>data?.items||data?.events||data?.evidence||[];
-// El backend antiguo devuelve imágenes Base64 en evidence_list.
-// Para verificar guardados solo necesitamos los metadatos.
-const evidenceMetadata=rows=>rows.map(row=>{const copy={...row};for(const key of ['Archivo_URL','archivoUrl','url','fileUrl'])if(typeof copy[key]==='string'&&copy[key].startsWith('data:'))copy[key]='';return copy;});
 const value=(row,...names)=>{for(const name of names){if(row?.[name]!==undefined)return row[name]}return''};
 const hasField=(row,...names)=>names.some(name=>row&&Object.prototype.hasOwnProperty.call(row,name));
 const rowId=row=>String(value(row,'ID','id')||'');
@@ -46,30 +43,28 @@ export const getSession=()=>request('session');
 export const getHistory=date=>request('history',{date});
 export const getEvents=date=>request('events',{date});
 export const getEvidence=date=>request('evidence_list',{date});
-export const getEvidenceImage=(id,date)=>request('evidence_image',{id,date});
 export const getNextOrder=date=>request('nextorder',{date});
 export const getContacts=()=>request('contacts');
 export const createContact=contact=>request('contact',contact);
 export const updateContact=contact=>request('update_contact',contact);
 export const deactivateContact=id=>request('delete_contact',{id});
-export const createEvent=async event=>{
-  const e=canonicalEvent(event);
-  if(!e.id||!e.date)throw new Error('Registro incompleto: falta ID o fecha.');
-  // Una única escritura. El backend comprueba IDs repetidos bajo bloqueo.
-  // Evitar dos consultas extra a Sheets por cada guardado.
-  return request('event',e);
-};
+export const createEvent=async event=>{const e=canonicalEvent(event);if(!e.id||!e.date)throw new Error('Registro incompleto: falta ID o fecha.');const before=rows(await request('events',{date:e.date}));const existing=before.filter(row=>rowId(row)===String(e.id));if(existing.length>1)throw new Error(`Google ya contiene registros duplicados con ID ${e.id}.`);if(existing.length===1){await verifyEvent(e,true);return{ok:true,id:e.id,idempotent:true}}const result=await request('event',event);await verifyEvent(e,true);return result};
 export const updateEvent=async event=>{const e=canonicalEvent(event);const result=await request('update_event',e);await verifyEvent(e,true);return result};
 export const deleteEvent=async(id,date=today())=>{const result=await request('delete_event',{id});await verifyEvent({id,date},false);return result};
 export const createEvidence=async evidence=>{
   const e=canonicalEvidence(evidence);
   if(!e.id||!e.date)throw new Error('Evidencia incompleta: falta ID o fecha.');
-  // Backend 4.0.6 gestiona reintentos y duplicados con bloqueo.
-  // Evitar descargar dos listas de evidencias por cada fotografía.
+  const before=rows(await request('evidence_list',{date:e.date}));
+  const existing=before.filter(row=>rowId(row)===String(e.id));
+  if(existing.length>1)throw new Error('Google contiene evidencias duplicadas con el mismo ID. Revisa el histórico.');
+  if(existing.length===1){const found=existing[0];return{ok:true,id:e.id,idempotent:true,fileUrl:value(found,'URL','Url','url','fileUrl','Archivo_URL','archivoUrl')}}
   const result=await request('evidence',e);
-  const url=result.fileUrl||result.url||result.archivoUrl||'';
-  if(!url)throw new Error('Google no confirmó el enlace de la fotografía. Consulta el histórico antes de repetir.');
-  return {...result,fileUrl:url};
+  const after=rows(await request('evidence_list',{date:e.date}));
+  const matches=after.filter(row=>rowId(row)===String(e.id));
+  if(matches.length!==1)throw new Error('Google no confirma una única evidencia. Comprueba el histórico antes de repetir la subida.');
+  const url=result.fileUrl||result.url||result.archivoUrl||value(matches[0],'URL','Url','url','fileUrl','Archivo_URL','archivoUrl');
+  if(!url)throw new Error('La evidencia figura en Google, pero no se ha confirmado su enlace. Consulta el histórico antes de repetir.');
+  return{...result,fileUrl:url};
 };
 export const deleteEvidence=async(id,date=today())=>{const result=await request('delete_evidence',{id});await verifyEvidenceDeleted(id,date);return result};
 export const createOrder=order=>request('order',order);
