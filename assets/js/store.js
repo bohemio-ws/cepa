@@ -19,7 +19,7 @@ const write=(n,v)=>{
   try{localStorage.setItem(key(n),JSON.stringify(diskValue(n,v)));return true}
   catch(error){
     console.warn('CEPA: caché persistente no disponible; datos de la sesión conservados en memoria.',{bucket:n,error});
-    try{window.dispatchEvent(new CustomEvent('cepa:cache-write-failed',{detail:{bucket:n,reason:error?.name||'UNKNOWN'}}))}catch{}
+    try{window.dispatchEvent(new CustomEvent('cepa:cache-write-failed',{detail:{bucket:n,reason:error?.name||'UNKNOWN',message:String(error?.message||'').slice(0,160)}}))}catch{}
     return false;
   }
 };
