@@ -18,7 +18,7 @@ function compressPhoto(file){
   // Blob URL -> scaled canvas -> compressed Blob -> small data URL.
   return new Promise((resolve,reject)=>{
     if(!file||!file.size)return reject(new Error('La fotografía está vacía.'));
-    const objectUrl=URL.createObjectURL(file),img=new Image();
+    let objectUrl;try{objectUrl=URL.createObjectURL(file)}catch{return reject(new Error('El navegador no puede abrir la fotografía.'))}const img=new Image();
     let canvas=null,finished=false;
     const cleanup=()=>{URL.revokeObjectURL(objectUrl);img.onload=null;img.onerror=null;if(canvas){canvas.width=0;canvas.height=0;canvas=null;}img.src='';};
     const fail=error=>{if(finished)return;finished=true;cleanup();reject(error instanceof Error?error:new Error('No se pudo procesar la fotografía.'))};
