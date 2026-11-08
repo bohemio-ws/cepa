@@ -52,7 +52,13 @@ export const getContacts=()=>request('contacts');
 export const createContact=contact=>request('contact',contact);
 export const updateContact=contact=>request('update_contact',contact);
 export const deactivateContact=id=>request('delete_contact',{id});
-export const createEvent=async event=>{const e=canonicalEvent(event);if(!e.id||!e.date)throw new Error('Registro incompleto: falta ID o fecha.');const before=rows(await request('events',{date:e.date}));const existing=before.filter(row=>rowId(row)===String(e.id));if(existing.length>1)throw new Error(`Google ya contiene registros duplicados con ID ${e.id}.`);if(existing.length===1){await verifyEvent(e,true);return{ok:true,id:e.id,idempotent:true}}const result=await request('event',event);await verifyEvent(e,true);return result};
+export const createEvent=async event=>{
+  const e=canonicalEvent(event);
+  if(!e.id||!e.date)throw new Error('Registro incompleto: falta ID o fecha.');
+  // Una única escritura. El backend comprueba IDs repetidos bajo bloqueo.
+  // Evitar dos consultas extra a Sheets por cada guardado.
+  return request('event',e);
+};
 export const updateEvent=async event=>{const e=canonicalEvent(event);const result=await request('update_event',e);await verifyEvent(e,true);return result};
 export const deleteEvent=async(id,date=today())=>{const result=await request('delete_event',{id});await verifyEvent({id,date},false);return result};
 export const createEvidence=async evidence=>{
