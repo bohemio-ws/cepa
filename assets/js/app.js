@@ -4,7 +4,49 @@ import {getHistory,getEvents,getEvidence,createEvent,updateEvent,deleteEvent,cre
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],now=()=>new Date().toISOString();
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const localDay=v=>{const d=new Date(v);if(Number.isNaN(d.getTime()))return'';const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${day}`};
-const chosenPhoto=f=>{const a=f.get('cameraPhoto'),b=f.get('photo');return a?.size?a:b?.size?b:null};
+const inlinePhotos=new WeakMap();
+const chosenPhoto=f=>{const camera=f.get('cameraPhoto'),gallery=f.get('photo');const form=f.get('area');const node=document.querySelector('#evidenceForm');return inlinePhotos.get(node)||(camera?.size?camera:gallery?.size?gallery:null)};
+async function captureInline(button){
+  if(!navigator.mediaDevices?.getUserMedia){button.parentElement.querySelector('input[type=file]')?.click();return;}
+  const previous=document.getElementById('cepa-camera-overlay');if(previous)return;
+  let stream=null,finished=false;
+  const overlay=document.createElement('div');overlay.id='cepa-camera-overlay';overlay.style.cssText='position:fixed;inset:0;z-index:9999;background:#111;color:white;display:flex;flex-direction:column;gap:12px;padding:16px;box-sizing:border-box';
+  overlay.innerHTML='<div style="font-weight:bold">Cámara CEPA</div><video autoplay muted playsinline style="width:100%;flex:1;min-height:0;object-fit:contain"></video><div style="display:flex;gap:12px"><button type="button" data-camera-cancel style="flex:1;padding:15px">Cancelar</button><button type="button" data-camera-shot style="flex:1;padding:15px">Capturar</button></div><p data-camera-error role="status"></p>';
+  document.body.appendChild(overlay);
+  const video=overlay.querySelector('video'),error=overlay.querySelector('[data-camera-error]');
+  const close=()=>{if(finished)return;finished=true;stream?.getTracks().forEach(t=>t.stop());video.srcObject=null;overlay.remove()};
+  overlay.querySelector('[data-camera-cancel]').onclick=close;
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:960},height:{ideal:720}}});
+    if(finished){stream.getTracks().forEach(t=>t.stop());return}
+    video.srcObject=stream;await video.play();
+  }catch(e){error.textContent='La cámara integrada no está disponible. Pulsa Cancelar y usa Elegir archivo.';stream?.getTracks().forEach(t=>t.stop());return}
+  overlay.querySelector('[data-camera-shot]').onclick=()=>{
+    if(!video.videoWidth||!video.videoHeight){error.textContent='Espera a que aparezca la imagen.';return}
+    const scale=Math.min(1,800/Math.max(video.videoWidth,video.videoHeight)),canvas=document.createElement('canvas');
+    canvas.width=Math.round(video.videoWidth*scale);canvas.height=Math.round(video.videoHeight*scale);
+    canvas.getContext('2d',{alpha:false}).drawImage(video,0,0,canvas.width,canvas.height);
+    canvas.toBlob(blob=>{
+      canvas.width=0;canvas.height=0;
+      if(!blob){error.textContent='No se pudo capturar la fotografía.';return}
+      const file=new File([blob],'cepa-foto-'+Date.now()+'.jpg',{type:'image/jpeg'});
+      const room=button.closest('[data-room]');const form=button.closest('form');
+      if(room)inlinePhotos.set(room,file);else if(form)inlinePhotos.set(form,file);
+      close();
+      const msg=document.getElementById('dailyMsg')||document.getElementById('evidenceMsg');
+      if(msg)msg.textContent='Fotografía preparada. Pulsa Guardar para subirla.';
+    },'image/jpeg',0.65);
+  };
+}
+function enableInlineCamera(){
+  document.querySelectorAll('input[type=file][capture]').forEach(input=>{
+    const label=input.closest('label');if(!label||label.dataset.inlineCamera)return;
+    label.dataset.inlineCamera='yes';
+    const button=document.createElement('button');button.type='button';button.className='photo-btn';button.textContent='📷 Hacer foto';
+    label.style.display='none';label.parentNode.insertBefore(button,label);
+    button.onclick=()=>captureInline(button);
+  });
+}
 const key=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[_\s/.-]/g,'').toLowerCase();
 function field(o,...names){const wanted=new Set(names.map(key));for(const[k,v]of Object.entries(o||{}))if(wanted.has(key(k)))return v;return''}
 const payload=(x,tipo,zona,estado,observacion,referencia='',cantidad='',unidad='',prioridad='')=>{const d=new Date(x.createdAt||now());return{id:x.id,fecha:localDay(d),hora:d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}),tipo,zona,estado,observacion,referencia,cantidad,unidad,prioridad,origen:'CEPA_APP'}};
@@ -52,7 +94,7 @@ const pendingPhotoIds=new WeakMap();
 async function addPhoto(file,contextType,contextId,area,notes=''){if(!file||!file.size)return null;let upload=pendingPhotoIds.get(file);if(!upload){upload={id:uid('FOTO'),createdAt:now()};pendingPhotoIds.set(file,upload)}const {id,createdAt}=upload;const imageBase64=await compressPhoto(file);const r=await createEvidence({id,fecha:localDay(createdAt),hora:new Date(createdAt).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}),tipo:contextType,referenciaId:contextId,zona:area,descripcion:notes,archivo:imageBase64,nombre:file.name,origen:'CEPA_APP'});const url=r.fileUrl||r.url||r.archivoUrl||'';if(!url)throw new Error('Google no ha confirmado el enlace de la fotografía. Comprueba la carpeta de Drive antes de repetir la subida para evitar duplicados.');const x={id,createdAt,contextType,contextId,area,notes,name:file.name,type:'image/jpeg',url};Store.add('evidence',x);pendingPhotoIds.delete(file);return x}
 const todayRooms=()=>Store.list('roomEvents').filter(x=>localDay(x.createdAt)===localDay(new Date()));
 const pendingRoomPhoto=new Map();
-async function saveRoom(id){const cfg=CONFIG.rooms.find(x=>x[0]===id);if(!cfg)return;const[,name,legacyId]=cfg,check=$(`[data-room="${id}"]`),obs=$(`[data-obs="${id}"]`),cam=$(`[data-room-camera="${id}"]`),gal=$(`[data-room-photo="${id}"]`),msg=$('#dailyMsg');const x={id:uid('REG'),createdAt:now(),roomId:id,legacyId,name,done:check.checked,obs:obs.value.trim(),status:$('#dailyStatus').value};const pending=pendingRoomPhoto.get(id);const record=pending||x;if(!pending){try{await persist('roomEvents',x,payload(x,'TRABAJO_DIARIO',name,x.status,x.obs,legacyId))}catch(e){msg.textContent=`No guardado en Google: ${e.message||'error de conexión'}`;return}}const file=cam.files?.[0]||gal.files?.[0];if(pending&&!file){msg.textContent=`${name}: el registro ya está guardado. Selecciona una fotografía para completar la evidencia, sin crear otro registro.`;return}if(file){try{await addPhoto(file,'roomEvent',record.id,name,record.obs)}catch(e){pendingRoomPhoto.set(id,record);renderRoomHistory();renderReport();msg.textContent=`${name}: registro guardado, pero NO la fotografía: ${e.message||'error de subida'}. Mantén la foto seleccionada y pulsa Guardar otra vez para reintentar solo la imagen, sin duplicar el registro.`;return}}pendingRoomPhoto.delete(id);check.checked=false;obs.value='';cam.value='';gal.value='';renderRoomHistory();renderReport();msg.textContent=`${name}: registro guardado y sincronizado con Google.`}
+async function saveRoom(id){const cfg=CONFIG.rooms.find(x=>x[0]===id);if(!cfg)return;const[,name,legacyId]=cfg,check=$(`[data-room="${id}"]`),obs=$(`[data-obs="${id}"]`),cam=$(`[data-room-camera="${id}"]`),gal=$(`[data-room-photo="${id}"]`),msg=$('#dailyMsg');const x={id:uid('REG'),createdAt:now(),roomId:id,legacyId,name,done:check.checked,obs:obs.value.trim(),status:$('#dailyStatus').value};const pending=pendingRoomPhoto.get(id);const record=pending||x;if(!pending){try{await persist('roomEvents',x,payload(x,'TRABAJO_DIARIO',name,x.status,x.obs,legacyId))}catch(e){msg.textContent=`No guardado en Google: ${e.message||'error de conexión'}`;return}}const file=inlinePhotos.get(cam.closest('[data-room]'))||cam.files?.[0]||gal.files?.[0];if(pending&&!file){msg.textContent=`${name}: el registro ya está guardado. Selecciona una fotografía para completar la evidencia, sin crear otro registro.`;return}if(file){try{await addPhoto(file,'roomEvent',record.id,name,record.obs)}catch(e){pendingRoomPhoto.set(id,record);renderRoomHistory();renderReport();msg.textContent=`${name}: registro guardado, pero NO la fotografía: ${e.message||'error de subida'}. Mantén la foto seleccionada y pulsa Guardar otra vez para reintentar solo la imagen, sin duplicar el registro.`;return}}pendingRoomPhoto.delete(id);inlinePhotos.delete(cam.closest('[data-room]'));check.checked=false;obs.value='';cam.value='';gal.value='';renderRoomHistory();renderReport();msg.textContent=`${name}: registro guardado y sincronizado con Google.`}
 function renderRoomHistory(){for(const[id]of CONFIG.rooms){const list=todayRooms().filter(x=>x.roomId===id),box=$(`[data-room-log="${id}"]`);if(box)box.innerHTML=list.length?`<small><b>${list.length} registro${list.length>1?'s':''} hoy</b></small>`:''}}
 async function saveGeneral(){const x={id:uid('GENERAL'),createdAt:now(),status:$('#dailyStatus').value,notes:$('#dailyNotes').value.trim()};try{await persist('dailyGeneral',x,payload(x,'OBSERVACION_GENERAL','CEPA Altomira',x.status,x.notes));$('#dailyMsg').textContent='Observaciones guardadas y sincronizadas.'}catch(e){$('#dailyMsg').textContent=e.message}}
 async function saveIncident(e){e.preventDefault();const f=new FormData(e.target),x={id:uid('INC'),createdAt:now(),status:'Abierta',area:f.get('area').trim(),type:f.get('type'),priority:f.get('priority'),description:f.get('description').trim()};try{await persist('incidents',x,payload(x,'INCIDENCIA',x.area,x.status,x.description,x.type,'','',x.priority));await addPhoto(chosenPhoto(f),'incident',x.id,x.area,x.description);e.target.reset();renderLists();renderReport()}catch(err){alert(err.message)}}
